@@ -3,14 +3,15 @@
 class Database{
 private:
    int id;
-   int password;
+   std::string password;
 
 public:
    Database(int id);
-   Database(int id, int password);
+   Database(int id, std::string password);
 
-   void setPassword(int previousPassword, int newPassword);
+   void setDatabasePassword(std::string password);
    
    std::string read(int key);
-   int write(int key, int val);
+
+   int write(int key, std::string value);
 };

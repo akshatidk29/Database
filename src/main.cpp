@@ -4,6 +4,6 @@
 
 int main(){
    Database d1(1);
-   d1.write(0, 100);
+   d1.write(0, "100");
    return 0;
 }

@@ -6,15 +6,14 @@
 
 int numDatabases = 0;
 
-bool checkDatabase(int id)
+bool checkDatabaseExistence(int id)
 {
 
-   std::ifstream databaseStore("../data/databaseStore.db");
+   std::ifstream databaseStoreIn("../data/databaseStore.db");
    std::string line;
 
-   while (std::getline(databaseStore, line))
+   while (std::getline(databaseStoreIn, line))
    {
-
       int colonPos = line.find(':');
       if (colonPos == std::string::npos)
       {
@@ -24,22 +23,60 @@ bool checkDatabase(int id)
       std::string presentId = line.substr(0, colonPos);
       if (presentId == std::to_string(id))
       {
-         databaseStore.close();
+         databaseStoreIn.close();
          return true;
       }
    }
 
-   databaseStore.close();
+   databaseStoreIn.close();
    return false;
 }
 
-bool authorizeDatabase(int id, int password)
+bool addNewDatabase(int id, std::string password)
 {
 
-   std::ifstream databaseStore("../data/databaseStore.db");
+   bool check = checkDatabaseExistence(id);
+
+   if (check)
+   {
+      std::cout << "Database with same ID existed already!" << std::endl;
+      return false;
+   }
+
+   std::ofstream databaseStoreOut("../data/databaseStore.db");
+
+   if (!databaseStoreOut.is_open())
+   {
+      std::cout << "Error Occured while opening Database Store." << std::endl;
+      return false;
+   }
+
+   databaseStoreOut << id << ":" << password << std::endl;
+   databaseStoreOut.close();
+
+   std::string databasePath = "../data/" + std::to_string(id) + ".db";
+   std::ofstream databaseFileOut(databasePath);
+
+   if (!databaseFileOut.is_open())
+   {
+      std::cout << "Error Occured while opening Database File" << std::endl;
+      return false;
+   }
+
+   databaseFileOut.close();
+
+   numDatabases++;
+
+   return true;
+}
+
+bool authorizeDatabaseAccess(int id, std::string password)
+{
+
+   std::ifstream databaseStoreIn("../data/databaseStore.db");
    std::string line;
 
-   while (std::getline(databaseStore, line))
+   while (std::getline(databaseStoreIn, line))
    {
 
       int colonPos = line.find(':');
@@ -51,53 +88,54 @@ bool authorizeDatabase(int id, int password)
       std::string presentId = line.substr(0, colonPos);
       std::string presentPassword = line.substr(colonPos);
 
-      if (presentId == std::to_string(id) && presentPassword == std::to_string(password))
+      if (presentId == std::to_string(id) && presentPassword == password)
       {
-         databaseStore.close();
+         databaseStoreIn.close();
          return true;
       }
    }
 
-   databaseStore.close();
+   databaseStoreIn.close();
    return false;
 }
 
-bool changePassword(int id, int previousPassword, int newPassword)
+bool changeDatabasePassword(int id, std::string previousPassword, std::string newPassword)
 {
 
-   std::ifstream databaseStore("../data/databaseStore.db");
+   std::ifstream databaseStoreIn("../data/databaseStore.db");
    std::string line;
    std::vector<std::string> buffer;
 
    bool found = false;
 
-   while (std::getline(databaseStore, line))
+   while (std::getline(databaseStoreIn, line))
    {
       int colonPos = line.find(':');
       if (colonPos == std::string::npos)
       {
          continue;
       }
+
       std::string presentId = line.substr(0, colonPos);
       std::string presentPassword = line.substr(colonPos);
 
-      if (presentId == std::to_string(id) && presentPassword == std::to_string(previousPassword))
+      if (presentId == std::to_string(id) && presentPassword == previousPassword)
       {
          found = true;
       }else{
          buffer.push_back(line);
       }
    }
-   databaseStore.close();
+   databaseStoreIn.close();
 
-   std::ofstream databaseStore2("../data/databaseStore.db");
+   std::ofstream databaseStoreOut("../data/databaseStore.db");
 
    for(std::string& line : buffer){
-      databaseStore2 << line << std::endl;
+      databaseStoreOut << line << std::endl;
    }
 
    if(found){
-      databaseStore2 << id << ":" << newPassword << std::endl;
+      databaseStoreOut << id << ":" << newPassword << std::endl;
       std::cout << "Password Changed!\n";
       return true;
    }
@@ -105,38 +143,3 @@ bool changePassword(int id, int previousPassword, int newPassword)
    return false;
 }
 
-
-int addDatabase(int id, int password)
-{
-
-   bool check = checkDatabase(id);
-
-   if (check)
-   {
-      return 1;
-   }
-
-   std::ofstream databaseStore("../data/databaseStore.db");
-
-   if (!databaseStore.is_open())
-   {
-      return 2;
-   }
-
-   databaseStore << id << ":" << password << std::endl;
-   databaseStore.close();
-
-   std::string databasePath = "../data/" + std::to_string(id) + ".db";
-   std::ofstream databaseFile(databasePath);
-
-   if (!databaseFile.is_open())
-   {
-      return 3;
-   }
-
-   databaseFile.close();
-
-   numDatabases++;
-
-   return id;
-}

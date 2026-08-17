@@ -2,8 +2,8 @@
 
 extern int numDatabases;
 
-bool checkDatabase(int id);
-bool authorizeDatabase(int id, int password);
-bool changePassword(int id, int previousPassword, int newPassword);
+bool checkDatabaseExistence(int id);
+bool addNewDatabase(int id, std::string password);
+bool authorizeDatabaseAccess(int id, std::string password);
+bool changeDatabasePassword(int id, std::string previousPassword, std::string newPassword);
 
-int addDatabase(int id, int password);
