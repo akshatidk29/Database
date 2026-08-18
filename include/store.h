@@ -1,9 +1,22 @@
 #pragma once
+#include "return.h"
 
 extern int numDatabases;
 
-bool checkDatabaseExistence(int id);
-bool addNewDatabase(int id, std::string password);
-bool authorizeDatabaseAccess(int id, std::string password);
-bool changeDatabasePassword(int id, std::string previousPassword, std::string newPassword);
 
+
+ReturnCode checkDatabaseExistence(int id);
+
+ReturnCode addNewDatabase(int id, std::string password);
+
+
+ReturnCode authorizeDatabaseAccess(int id, std::string password);
+
+ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::string newPassword);
+
+
+ReturnCode readDatabase(int id, int key, std::string& value);
+
+ReturnCode writeDatabase(int id, int key, std::string value);
+
+ReturnCode updateDatabase(int id, int key, std::string value);
