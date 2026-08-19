@@ -1,5 +1,5 @@
-#include<iostream>
-#include"database.h"
+#include <iostream>
+#include "database.h"
 
 int main(){
    Database d1(1);

@@ -191,7 +191,7 @@ ReturnCode readDatabase(int id, int key, std::string& value){
    
    bool found = false;
 
-   while(std::getline(databaseFileIn, line)){
+   while(!found && std::getline(databaseFileIn, line)){
       
       std::size_t colonPos = line.find(':');
 
@@ -249,27 +249,52 @@ ReturnCode updateDatabase(int id, int key, std::string value){
       return check;
    }
 
-   std::string temporary;
-   ReturnCode keyCheck = readDatabase(id, key, temporary);
+   std::string databasePath = "data/" + std::to_string(id) + ".db";
+   std::ifstream databaseStoreIn(databasePath);
 
-   if (keyCheck == ReturnCode::FAILURE)
+   std::string line;
+   std::vector<std::string> buffer;
+
+   bool found = false;
+
+   while (std::getline(databaseStoreIn, line))
    {
+      std::size_t colonPos = line.find(':');
+      if (colonPos == std::string::npos)
+      {
+         databaseStoreIn.close();
+         return ReturnCode::DATABASE_STORE_CORRUPT_ERROR;
+      }
+
+      std::string presentKey = line.substr(0, colonPos);
+
+      if (presentKey == std::to_string(key))
+      {
+         found = true;
+      }else{
+         buffer.push_back(line);
+      }
+   }
+
+   databaseStoreIn.close();
+
+   if(found){
+      std::ofstream databaseFileOut(databasePath);
+
+      if(!databaseFileOut.is_open()){
+         return ReturnCode::DATABASE_FILE_ERROR;
+      }
+   
+      for(std::string& line : buffer){
+         databaseFileOut << line << std::endl;
+      }
+
+      databaseFileOut << key << ":" << value << std::endl;
+
+      databaseFileOut.close();
+   }else{
       return ReturnCode::KEY_NOT_FOUND;
    }
-
-   if (keyCheck != ReturnCode::SUCCESS)
-   {
-      return keyCheck;
-   }
-
-   std::string databasePath = "data/" + std::to_string(id) + ".db";
-   std::ofstream databaseFileOut(databasePath, std::ios::app);
-
-   if(!databaseFileOut.is_open()){
-      return ReturnCode::DATABASE_FILE_ERROR;
-   }
-
-   databaseFileOut << key << ":" << value << std::endl;
 
    return ReturnCode::SUCCESS;
 }
