@@ -68,7 +68,7 @@ void Database::changePassword(std::string previousPassword, std::string newPassw
 }
 
 
-void Database::readEntry(int key, std::string& value){
+void Database::readEntry(int key, std::string* value){
 
    ReturnCode check = readDatabaseEntry(this->id, key, value);
 
@@ -80,7 +80,7 @@ void Database::readEntry(int key, std::string& value){
    }
 }
 
-void Database::writeEntry(int key, std::string value){
+void Database::writeEntry(int key, std::string& value){
       
    ReturnCode check = writeDatabaseEntry(this->id, key, value);
 
@@ -95,7 +95,7 @@ void Database::writeEntry(int key, std::string value){
    }
 }
 
-void Database::updateEntry(int key, std::string value){
+void Database::updateEntry(int key, std::string& value){
       
    ReturnCode check = updateDatabaseEntry(this->id, key, value);
 

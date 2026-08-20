@@ -168,7 +168,7 @@ ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::str
 }
 
 
-ReturnCode readDatabaseEntry(int id, int key, std::string& value){
+ReturnCode readDatabaseEntry(int id, int key, std::string* value){
    
    ReturnCode check = checkDatabaseExistence(id);
    
@@ -210,12 +210,14 @@ ReturnCode readDatabaseEntry(int id, int key, std::string& value){
       if(method == "WRITE" || method == "UPDATE"){
          if(presentKey == std::to_string(key)){
             exists = true;
-            value = line.substr(colonPos2 + 1);
+            if(value)
+               *value = line.substr(colonPos2 + 1);
          }
       }else if(method == "DELETE"){
          if(presentKey == std::to_string(key)){
             exists = false;
-            value = "";
+            if(value)
+               *value = "";
          }
       }else{
          databaseFileIn.close();
@@ -231,10 +233,9 @@ ReturnCode readDatabaseEntry(int id, int key, std::string& value){
    return ReturnCode::FAILURE;
 }
 
-ReturnCode writeDatabaseEntry(int id, int key, std::string& value){
+ReturnCode writeDatabaseEntry(int id, int key, const std::string& value){
 
-   std::string temporary;
-   ReturnCode check = readDatabaseEntry(id, key, temporary);
+   ReturnCode check = readDatabaseEntry(id, key, nullptr);
    
    if(check == ReturnCode::SUCCESS){
       return ReturnCode::KEY_ALREADY_EXIST;
@@ -256,10 +257,9 @@ ReturnCode writeDatabaseEntry(int id, int key, std::string& value){
    return ReturnCode::SUCCESS;
 }
 
-ReturnCode updateDatabaseEntry(int id, int key, std::string& value){
+ReturnCode updateDatabaseEntry(int id, int key, const std::string& value){
 
-   std::string temporary;
-   ReturnCode check = readDatabaseEntry(id, key, temporary);
+   ReturnCode check = readDatabaseEntry(id, key, nullptr);
    
    if(check == ReturnCode::FAILURE){
       return ReturnCode::KEY_NOT_FOUND;
@@ -283,8 +283,7 @@ ReturnCode updateDatabaseEntry(int id, int key, std::string& value){
 
 ReturnCode deleteDatabaseEntry(int id, int key){
   
-   std::string temporary;
-   ReturnCode check = readDatabaseEntry(id, key, temporary);
+   ReturnCode check = readDatabaseEntry(id, key, nullptr);
    
    if(check == ReturnCode::FAILURE){
       return ReturnCode::KEY_NOT_FOUND;

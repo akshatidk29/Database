@@ -6,11 +6,13 @@
 
 class Instruction{
 public:
-   int key;
-   int value;
-   std::string method;
+   const int key;
+   const bool printValue;
+   const std::string value;
+   const std::string method;
+   std::string* readValue;
 
-   Instruction(std::string& method, int key, int value);
+   Instruction(const std::string& method, const int& key, const std::string& value, std::string* readValue, const bool& printValue);
 };
 
 class Transaction{
@@ -18,9 +20,15 @@ private:
    int tid;
    static int id;
 
+   void addInstruction(const std::string& method, const int& key, const std::string& value, std::string* readValue, const bool& printValue);
+
 public:
    std::vector<Instruction*> instructions;
 
    Transaction();
-   void addInstruction(std::string method, int key, int value = 0);
+
+   void _delete(const int& key);
+   void _write(const int& key, const std::string& value);
+   void _update(const int& key, const std::string& value);
+   void _read(const int& key, std::string* readValue, const bool& printValue);
 };

@@ -17,9 +17,9 @@ ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::str
 
 ReturnCode deleteDatabaseEntry(int id, int key);
 
-ReturnCode readDatabaseEntry(int id, int key, std::string& value);
+ReturnCode readDatabaseEntry(int id, int key, std::string* value);
 
-ReturnCode writeDatabaseEntry(int id, int key, std::string& value);
+ReturnCode writeDatabaseEntry(int id, int key, const std::string& value);
 
-ReturnCode updateDatabaseEntry(int id, int key, std::string& value);
+ReturnCode updateDatabaseEntry(int id, int key, const std::string& value);
 
