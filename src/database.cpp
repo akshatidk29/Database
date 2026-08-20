@@ -5,38 +5,39 @@
 #include "return.h"
 #include "database.h"
 
-Database::Database(int id)
-   : id(id), password(""){
+Database::Database(int id, std::string password, bool create = false)
+   : id(id), password(password){
 
-   ReturnCode check = checkDatabaseExistence(id);
-
-   if(check == ReturnCode::FAILURE){
-      std::cout << "Database creation instantiated, set the password to get started!" << std::endl;
-   }
-   else{
+   if(!create){
+      ReturnCode check = authorizeDatabaseAccess(id, password);
+      
       if(check == ReturnCode::SUCCESS){
-         std::cout << "Database with same id already exists!" << std::endl;
-      }else{
-         std::cout << "Internal server error!" << std::endl;
-      }
-   } 
-}
-
-Database::Database(int id, std::string password)
-   : id(id), password(""){
-   
-   ReturnCode check = authorizeDatabaseAccess(id, password);
-
-   if(check == ReturnCode::SUCCESS){
-      this->password = password;
-      std::cout << "Authorized, Giving Access to Database." << std::endl;
-   }
-   else{
-      if(check == ReturnCode::FAILURE){
-      std::cout << "Wrong Credentials!" << std::endl;
+         this->password = password;
+      std::cout << "Authorized, giving access to database." << std::endl;
       }
       else{
-         std::cout << "Internal server error!" << std::endl;
+         if(check == ReturnCode::FAILURE){
+            std::cout << "Wrong credentials!" << std::endl;
+         }
+         else{
+            std::cout << "Internal server error!" << std::endl;
+         }
+      }
+   }
+   else{
+      if(password == ""){
+         std::cout << "Password can't be empty!" << std::endl;
+         return;
+      }
+      ReturnCode check = addNewDatabase(id, password);
+      if(check == ReturnCode::SUCCESS){
+         this->password = password;
+         std::cout << "Database added!" << std::endl;
+      }
+      else if(check == ReturnCode::FAILURE){
+         std::cout << "Database with same ID already exists!" << std::endl;
+      }else{
+         std::cout << "Internal server error!" << std::endl; 
       }
    }
 }
@@ -45,34 +46,9 @@ int Database::getId(){
    return this->id;
 }
 
-void Database::setPassword(std::string password){
-   if(password == ""){
-      std::cout << "Password can't be empty!" << std::endl;
-      return;
-   }
-   if(this->password == ""){
-      ReturnCode check = addNewDatabase(id, password);
-      if(check == ReturnCode::SUCCESS){
-         this->password = password;
-         std::cout << "Password set successfully for the database!" << std::endl;
-      }
-      else if(check == ReturnCode::FAILURE){
-         std::cout << "Database with same ID already exists!" << std::endl;
-      }else{
-         std::cout << "Internal server error!" << std::endl; 
-      }
-   }else{
-      std::cout << "Password already created, use changeDatabasePassword." << std::endl;
-   }
-}
-
 void Database::changePassword(std::string previousPassword, std::string newPassword){
 
-   if(this->password == ""){
-      std::cout << "Please Set Password First, using setPassword!" << std::endl;
-      return;
-   }  
-   else if(newPassword == ""){
+   if(newPassword == ""){
       std::cout << "Password can't be empty!" << std::endl;
       return;
    }
@@ -91,15 +67,11 @@ void Database::changePassword(std::string previousPassword, std::string newPassw
    }
 }
 
-std::string Database::read(int key){
 
-   if(this->password == ""){
-      std::cout << "Please Set Password First, using setPassword!" << std::endl;
-      return "";
-   }
+std::string Database::readEntry(int key){
 
    std::string value = "";
-   ReturnCode check = readDatabase(this->id, key, value);
+   ReturnCode check = readDatabaseEntry(this->id, key, value);
 
    if(check == ReturnCode::FAILURE){
       std::cout << "Key not found!" << std::endl;
@@ -110,14 +82,9 @@ std::string Database::read(int key){
    return value;
 }
 
-void Database::write(int key, std::string value){
+void Database::writeEntry(int key, std::string value){
       
-   if(this->password == ""){
-      std::cout << "Please Set Password First, using setPassword!" << std::endl;
-      return;
-   }
-
-   ReturnCode check = writeDatabase(this->id, key, value);
+   ReturnCode check = writeDatabaseEntry(this->id, key, value);
 
    if(check == ReturnCode::SUCCESS){
       return;
@@ -130,14 +97,24 @@ void Database::write(int key, std::string value){
    }
 }
 
-void Database::update(int key, std::string value){
+void Database::updateEntry(int key, std::string value){
       
-   if(this->password == ""){
-      std::cout << "Please Set Password First, using setPassword!" << std::endl;
+   ReturnCode check = updateDatabaseEntry(this->id, key, value);
+
+   if(check == ReturnCode::SUCCESS){
       return;
    }
+   else if(check == ReturnCode::KEY_NOT_FOUND){
+      std::cout << "Key not found!" << std::endl;
+   }
+   else{
+      std::cout << "Internal server error!" << std::endl;
+   }
+}
 
-   ReturnCode check = updateDatabase(this->id, key, value);
+void Database::deleteEntry(int key){
+
+   ReturnCode check = deleteDatabaseEntry(this->id, key);
 
    if(check == ReturnCode::SUCCESS){
       return;

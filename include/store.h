@@ -15,8 +15,11 @@ ReturnCode authorizeDatabaseAccess(int id, std::string password);
 ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::string newPassword);
 
 
-ReturnCode readDatabase(int id, int key, std::string& value);
+ReturnCode deleteDatabaseEntry(int id, int key);
 
-ReturnCode writeDatabase(int id, int key, std::string value);
+ReturnCode readDatabaseEntry(int id, int key, std::string& value);
 
-ReturnCode updateDatabase(int id, int key, std::string value);
+ReturnCode writeDatabaseEntry(int id, int key, std::string& value);
+
+ReturnCode updateDatabaseEntry(int id, int key, std::string& value);
+

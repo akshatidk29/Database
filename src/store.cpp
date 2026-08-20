@@ -71,12 +71,10 @@ ReturnCode addNewDatabase(int id, std::string password)
    databaseStoreOut << id << ":" << password << std::endl;
    databaseStoreOut.close();
 
-
    numDatabases++;
 
    return ReturnCode::SUCCESS;
 }
-
 
 ReturnCode authorizeDatabaseAccess(int id, std::string password)
 {
@@ -111,6 +109,7 @@ ReturnCode authorizeDatabaseAccess(int id, std::string password)
    databaseStoreIn.close();
    return ReturnCode::FAILURE;
 }
+
 
 ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::string newPassword)
 {
@@ -169,7 +168,7 @@ ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::str
 }
 
 
-ReturnCode readDatabase(int id, int key, std::string& value){
+ReturnCode readDatabaseEntry(int id, int key, std::string& value){
    
    ReturnCode check = checkDatabaseExistence(id);
    
@@ -189,34 +188,53 @@ ReturnCode readDatabase(int id, int key, std::string& value){
 
    std::string line;
    
-   bool found = false;
+   bool exists = false;
 
-   while(!found && std::getline(databaseFileIn, line)){
+   while(std::getline(databaseFileIn, line)){
       
-      std::size_t colonPos = line.find(':');
-
-      if(colonPos == std::string::npos){
+      std::size_t colonPos1 = line.find(':');
+      if(colonPos1 == std::string::npos){
          databaseFileIn.close();
          return ReturnCode::DATABASE_FILE_CORRUPT_ERROR;
       }
-      std::string presentKey = line.substr(0, colonPos);
-      if(presentKey == std::to_string(key)){
-         found = true;
-         value = line.substr(colonPos + 1);
+
+      std::size_t colonPos2 = line.find(':', colonPos1 + 1);
+      if(colonPos2 == std::string::npos){
+         databaseFileIn.close();
+         return ReturnCode::DATABASE_FILE_CORRUPT_ERROR;
+      }
+
+      std::string presentKey = line.substr(0, colonPos1);
+      std::string method = line.substr(colonPos1 + 1, colonPos2 - colonPos1 - 1);
+
+      if(method == "WRITE" || method == "UPDATE"){
+         if(presentKey == std::to_string(key)){
+            exists = true;
+            value = line.substr(colonPos2 + 1);
+         }
+      }else if(method == "DELETE"){
+         if(presentKey == std::to_string(key)){
+            exists = false;
+            value = "";
+         }
+      }else{
+         databaseFileIn.close();
+         return ReturnCode::DATABASE_FILE_CORRUPT_ERROR;
       }
    }
+
    databaseFileIn.close();
 
-   if(found){
+   if(exists){
       return ReturnCode::SUCCESS;
    }
    return ReturnCode::FAILURE;
 }
 
-ReturnCode writeDatabase(int id, int key, std::string value){
+ReturnCode writeDatabaseEntry(int id, int key, std::string& value){
 
    std::string temporary;
-   ReturnCode check = readDatabase(id, key, temporary);
+   ReturnCode check = readDatabaseEntry(id, key, temporary);
    
    if(check == ReturnCode::SUCCESS){
       return ReturnCode::KEY_ALREADY_EXIST;
@@ -232,69 +250,58 @@ ReturnCode writeDatabase(int id, int key, std::string value){
       return ReturnCode::DATABASE_FILE_ERROR;
    }
 
-   databaseFileOut << key << ":" << value << std::endl;
+   databaseFileOut << key << ":WRITE:" << value << std::endl;
    databaseFileOut.close();
 
    return ReturnCode::SUCCESS;
 }
 
-ReturnCode updateDatabase(int id, int key, std::string value){
+ReturnCode updateDatabaseEntry(int id, int key, std::string& value){
 
-   ReturnCode check = checkDatabaseExistence(id);
+   std::string temporary;
+   ReturnCode check = readDatabaseEntry(id, key, temporary);
    
    if(check == ReturnCode::FAILURE){
-      return ReturnCode::DATABASE_NOT_FOUND;
+      return ReturnCode::KEY_NOT_FOUND;
    }
-   else if(check != ReturnCode::SUCCESS){
+   if(check != ReturnCode::SUCCESS){
       return check;
    }
 
    std::string databasePath = "data/" + std::to_string(id) + ".db";
-   std::ifstream databaseStoreIn(databasePath);
+   std::ofstream databaseFileOut(databasePath, std::ios::app);
 
-   std::string line;
-   std::vector<std::string> buffer;
-
-   bool found = false;
-
-   while (std::getline(databaseStoreIn, line))
-   {
-      std::size_t colonPos = line.find(':');
-      if (colonPos == std::string::npos)
-      {
-         databaseStoreIn.close();
-         return ReturnCode::DATABASE_STORE_CORRUPT_ERROR;
-      }
-
-      std::string presentKey = line.substr(0, colonPos);
-
-      if (presentKey == std::to_string(key))
-      {
-         found = true;
-      }else{
-         buffer.push_back(line);
-      }
+   if(!databaseFileOut.is_open()){
+      return ReturnCode::DATABASE_FILE_ERROR;
    }
 
-   databaseStoreIn.close();
+   databaseFileOut << key << ":UPDATE:" << value << std::endl;
+   databaseFileOut.close();
 
-   if(found){
-      std::ofstream databaseFileOut(databasePath);
+   return ReturnCode::SUCCESS;
+}
 
-      if(!databaseFileOut.is_open()){
-         return ReturnCode::DATABASE_FILE_ERROR;
-      }
+ReturnCode deleteDatabaseEntry(int id, int key){
+  
+   std::string temporary;
+   ReturnCode check = readDatabaseEntry(id, key, temporary);
    
-      for(std::string& line : buffer){
-         databaseFileOut << line << std::endl;
-      }
-
-      databaseFileOut << key << ":" << value << std::endl;
-
-      databaseFileOut.close();
-   }else{
+   if(check == ReturnCode::FAILURE){
       return ReturnCode::KEY_NOT_FOUND;
    }
+   if(check != ReturnCode::SUCCESS){
+      return check;
+   }
+
+   std::string databasePath = "data/" + std::to_string(id) + ".db";
+   std::ofstream databaseFileOut(databasePath, std::ios::app);
+
+   if(!databaseFileOut.is_open()){
+      return ReturnCode::DATABASE_FILE_ERROR;
+   }
+
+   databaseFileOut << key << ":DELETE:" << std::endl;
+   databaseFileOut.close();
 
    return ReturnCode::SUCCESS;
 }

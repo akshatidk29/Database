@@ -6,14 +6,13 @@ private:
    std::string password;
 
 public:
-   Database(int id);
-   Database(int id, std::string password);
+   Database(int id, std::string password, bool create);
 
    int  getId();
-   void setPassword(std::string password);
    void changePassword(std::string previousPassword, std::string newPassword);
    
-   std::string read(int key);
-   void write(int key, std::string value);
-   void update(int key, std::string value);
+   void deleteEntry(int key);
+   std::string readEntry(int key);
+   void writeEntry(int key, std::string value);
+   void updateEntry(int key, std::string value);
 };
