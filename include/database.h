@@ -12,7 +12,7 @@ public:
    void changePassword(std::string previousPassword, std::string newPassword);
    
    void deleteEntry(int key);
-   std::string readEntry(int key);
+   void readEntry(int key, std::string& value);
    void writeEntry(int key, std::string value);
    void updateEntry(int key, std::string value);
 };

@@ -68,9 +68,8 @@ void Database::changePassword(std::string previousPassword, std::string newPassw
 }
 
 
-std::string Database::readEntry(int key){
+void Database::readEntry(int key, std::string& value){
 
-   std::string value = "";
    ReturnCode check = readDatabaseEntry(this->id, key, value);
 
    if(check == ReturnCode::FAILURE){
@@ -79,7 +78,6 @@ std::string Database::readEntry(int key){
    else if(check != ReturnCode::SUCCESS){
       std::cout << "Internal server error!" << std::endl;
    }
-   return value;
 }
 
 void Database::writeEntry(int key, std::string value){

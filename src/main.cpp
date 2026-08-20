@@ -16,14 +16,23 @@ int main(){
    d1.writeEntry(1, "100");
    d1.writeEntry(2, "200"); 
 
-   std::cout << d1.readEntry(1) << std::endl;
-   std::cout << d1.readEntry(2) << std::endl; 
+   std::string result;
+
+   d1.readEntry(1, result);
+   std::cout <<  result << std::endl;   
+   
+   d1.readEntry(2, result);
+   std::cout <<  result << std::endl;
+
+
 
    d1.updateEntry(2, "300");
-   std::cout << d1.readEntry(2) << std::endl;
+   d1.readEntry(2, result);
+   std::cout <<  result << std::endl;
    
    d1.deleteEntry(2);
-   std::cout << d1.readEntry(2) << std::endl;
+   d1.readEntry(2, result);
+   std::cout <<  result << std::endl;
 
    return 0;
 }
