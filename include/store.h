@@ -5,21 +5,21 @@ extern int numDatabases;
 
 
 
-ReturnCode checkDatabaseExistence(int id);
+ReturnCode checkDatabaseExistence(const int& id);
 
-ReturnCode addNewDatabase(int id, std::string password);
-
-
-ReturnCode authorizeDatabaseAccess(int id, std::string password);
-
-ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::string newPassword);
+ReturnCode addNewDatabase(const int& id, const std::string& password);
 
 
-ReturnCode deleteDatabaseEntry(int id, int key);
+ReturnCode authorizeDatabaseAccess(const int& id, const std::string& password);
 
-ReturnCode readDatabaseEntry(int id, int key, std::string* value);
+ReturnCode changeDatabasePassword(const int& id, const std::string& previousPassword, const std::string& newPassword);
 
-ReturnCode writeDatabaseEntry(int id, int key, const std::string& value);
 
-ReturnCode updateDatabaseEntry(int id, int key, const std::string& value);
+ReturnCode deleteDatabaseEntry(const int& id, const int& key);
+
+ReturnCode readDatabaseEntry(const int& id, const int& key, std::string* value);
+
+ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& value);
+
+ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string& value);
 

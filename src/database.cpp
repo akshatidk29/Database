@@ -5,7 +5,7 @@
 #include "return.h"
 #include "database.h"
 
-Database::Database(int id, std::string password, bool create = false)
+Database::Database(const int& id, std::string& password, bool create=false)
    : id(id), password(password){
 
    if(!create){
@@ -46,7 +46,7 @@ int Database::getId(){
    return this->id;
 }
 
-void Database::changePassword(std::string previousPassword, std::string newPassword){
+void Database::changePassword(std::string& previousPassword, std::string& newPassword){
 
    if(newPassword == ""){
       std::cout << "Password can't be empty!" << std::endl;
@@ -68,7 +68,7 @@ void Database::changePassword(std::string previousPassword, std::string newPassw
 }
 
 
-void Database::readEntry(int key, std::string* value){
+void Database::readEntry(const int& key, std::string* value, const bool& printValue=false){
 
    ReturnCode check = readDatabaseEntry(this->id, key, value);
 
@@ -77,10 +77,12 @@ void Database::readEntry(int key, std::string* value){
    }
    else if(check != ReturnCode::SUCCESS){
       std::cout << "Internal server error!" << std::endl;
+   }else if(printValue){
+      std::cout << key << " : " << *(value) << std::endl;
    }
 }
 
-void Database::writeEntry(int key, std::string& value){
+void Database::writeEntry(const int& key, const std::string& value){
       
    ReturnCode check = writeDatabaseEntry(this->id, key, value);
 
@@ -95,7 +97,7 @@ void Database::writeEntry(int key, std::string& value){
    }
 }
 
-void Database::updateEntry(int key, std::string& value){
+void Database::updateEntry(const int& key, const std::string& value){
       
    ReturnCode check = updateDatabaseEntry(this->id, key, value);
 
@@ -110,7 +112,7 @@ void Database::updateEntry(int key, std::string& value){
    }
 }
 
-void Database::deleteEntry(int key){
+void Database::deleteEntry(const int& key){
 
    ReturnCode check = deleteDatabaseEntry(this->id, key);
 

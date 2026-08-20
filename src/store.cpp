@@ -8,7 +8,7 @@
 
 int numDatabases = 0;
 
-ReturnCode checkDatabaseExistence(int id)
+ReturnCode checkDatabaseExistence(const int& id)
 {
    std::ifstream databaseStoreIn("data/databaseStore.db");
    if(!databaseStoreIn.is_open()){
@@ -38,7 +38,7 @@ ReturnCode checkDatabaseExistence(int id)
    return ReturnCode::FAILURE;
 }
 
-ReturnCode addNewDatabase(int id, std::string password)
+ReturnCode addNewDatabase(const int& id, const std::string& password)
 {
    ReturnCode check = checkDatabaseExistence(id);
 
@@ -76,7 +76,7 @@ ReturnCode addNewDatabase(int id, std::string password)
    return ReturnCode::SUCCESS;
 }
 
-ReturnCode authorizeDatabaseAccess(int id, std::string password)
+ReturnCode authorizeDatabaseAccess(const int& id, const std::string& password)
 {
 
    std::ifstream databaseStoreIn("data/databaseStore.db");
@@ -111,7 +111,7 @@ ReturnCode authorizeDatabaseAccess(int id, std::string password)
 }
 
 
-ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::string newPassword)
+ReturnCode changeDatabasePassword(const int& id, const std::string& previousPassword, const std::string& newPassword)
 {
 
    std::ifstream databaseStoreIn("data/databaseStore.db");
@@ -168,7 +168,7 @@ ReturnCode changeDatabasePassword(int id, std::string previousPassword, std::str
 }
 
 
-ReturnCode readDatabaseEntry(int id, int key, std::string* value){
+ReturnCode readDatabaseEntry(const int& id, const int& key, std::string* value){
    
    ReturnCode check = checkDatabaseExistence(id);
    
@@ -233,7 +233,7 @@ ReturnCode readDatabaseEntry(int id, int key, std::string* value){
    return ReturnCode::FAILURE;
 }
 
-ReturnCode writeDatabaseEntry(int id, int key, const std::string& value){
+ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& value){
 
    ReturnCode check = readDatabaseEntry(id, key, nullptr);
    
@@ -257,7 +257,7 @@ ReturnCode writeDatabaseEntry(int id, int key, const std::string& value){
    return ReturnCode::SUCCESS;
 }
 
-ReturnCode updateDatabaseEntry(int id, int key, const std::string& value){
+ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string& value){
 
    ReturnCode check = readDatabaseEntry(id, key, nullptr);
    
@@ -281,7 +281,7 @@ ReturnCode updateDatabaseEntry(int id, int key, const std::string& value){
    return ReturnCode::SUCCESS;
 }
 
-ReturnCode deleteDatabaseEntry(int id, int key){
+ReturnCode deleteDatabaseEntry(const int& id, const int& key){
   
    ReturnCode check = readDatabaseEntry(id, key, nullptr);
    

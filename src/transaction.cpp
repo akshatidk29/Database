@@ -52,13 +52,11 @@ void Database::startTransaction(Transaction* txn){
       }
       else if(instruction->method == "DELETE"){
          this->deleteEntry(instruction->key);
-      }else if(instruction->method == "READ"){
-         this->readEntry(instruction->key, instruction->readValue);
-         if(instruction->printValue){
-            std::cout << instruction->key << " : " << instruction->value << std::endl;
-         }
-      }else{
-         std::cout << "Invalid instruction!" << std::endl;
+      }
+      else if(instruction->method == "READ"){
+         this->readEntry(instruction->key, instruction->readValue, instruction->printValue);
       }
    }
+
+   std::cout << "Transaction completed!" << std::endl;
 }
