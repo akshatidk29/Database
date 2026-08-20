@@ -4,6 +4,7 @@
 class Database{
 private:
    const int id;
+   bool access;
    std::string password;
 
    void deleteEntry(const int& key);

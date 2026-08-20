@@ -6,14 +6,15 @@
 #include "database.h"
 
 Database::Database(const int& id, std::string& password, bool create=false)
-   : id(id), password(password){
+   : id(id), password(password), access(false){
 
    if(!create){
       ReturnCode check = authorizeDatabaseAccess(id, password);
       
       if(check == ReturnCode::SUCCESS){
          this->password = password;
-      std::cout << "Authorized, giving access to database." << std::endl;
+         std::cout << "Authorized, giving access to database." << std::endl;
+         access = true;
       }
       else{
          if(check == ReturnCode::FAILURE){
@@ -33,6 +34,7 @@ Database::Database(const int& id, std::string& password, bool create=false)
       if(check == ReturnCode::SUCCESS){
          this->password = password;
          std::cout << "Database added!" << std::endl;
+         access = true;
       }
       else if(check == ReturnCode::FAILURE){
          std::cout << "Database with same ID already exists!" << std::endl;
@@ -43,10 +45,21 @@ Database::Database(const int& id, std::string& password, bool create=false)
 }
 
 int Database::getId(){
+  
+   if(!(this->access)){
+      std::cout << "Access denied!" << std::endl;
+      return -1;
+   }
+
    return this->id;
 }
 
 void Database::changePassword(std::string& previousPassword, std::string& newPassword){
+   
+   if(!(this->access)){
+      std::cout << "Access denied!" << std::endl;
+      return;
+   }
 
    if(newPassword == ""){
       std::cout << "Password can't be empty!" << std::endl;
@@ -69,6 +82,11 @@ void Database::changePassword(std::string& previousPassword, std::string& newPas
 
 
 void Database::readEntry(const int& key, std::string* value, const bool& printValue=false){
+  
+   if(!(this->access)){
+      std::cout << "Access denied!" << std::endl;
+      return;
+   }
 
    ReturnCode check = readDatabaseEntry(this->id, key, value);
 
@@ -83,7 +101,12 @@ void Database::readEntry(const int& key, std::string* value, const bool& printVa
 }
 
 void Database::writeEntry(const int& key, const std::string& value){
-      
+  
+   if(!(this->access)){
+      std::cout << "Access denied!" << std::endl;
+      return;
+   }
+       
    ReturnCode check = writeDatabaseEntry(this->id, key, value);
 
    if(check == ReturnCode::SUCCESS){
@@ -98,7 +121,12 @@ void Database::writeEntry(const int& key, const std::string& value){
 }
 
 void Database::updateEntry(const int& key, const std::string& value){
-      
+  
+   if(!(this->access)){
+      std::cout << "Access denied!" << std::endl;
+      return;
+   }
+    
    ReturnCode check = updateDatabaseEntry(this->id, key, value);
 
    if(check == ReturnCode::SUCCESS){
@@ -113,7 +141,12 @@ void Database::updateEntry(const int& key, const std::string& value){
 }
 
 void Database::deleteEntry(const int& key){
-
+  
+   if(!(this->access)){
+      std::cout << "Access denied!" << std::endl;
+      return;
+   }
+   
    ReturnCode check = deleteDatabaseEntry(this->id, key);
 
    if(check == ReturnCode::SUCCESS){
