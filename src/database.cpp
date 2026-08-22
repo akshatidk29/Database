@@ -15,8 +15,12 @@ Database::Database(const int& id, std::string& password, bool create=false)
       if(check == ReturnCode::SUCCESS){
          this->password = password;
          this->logger = new Logger(this->id);
-         std::cout << "Authorized, giving access to database." << std::endl;
-         access = true;
+         if(this->logger->getStatus()){
+            std::cout << "Authorized, giving access to database." << std::endl;
+            access = true;
+         }else{
+            std::cout << "Logger error!" << std::endl;
+         }
       }
       else{
          if(check == ReturnCode::FAILURE){
@@ -33,11 +37,18 @@ Database::Database(const int& id, std::string& password, bool create=false)
          return;
       }
       ReturnCode check = addNewDatabase(id, password);
+
       if(check == ReturnCode::SUCCESS){
+
          this->password = password;
          this->logger = new Logger(this->id);
-         std::cout << "Database added!" << std::endl;
-         access = true;
+         
+         if(this->logger->getStatus()){
+            std::cout << "Database added!" << std::endl;
+            access = true;
+         }else{
+            std::cout << "Logger error!" << std::endl;
+         }
       }
       else if(check == ReturnCode::FAILURE){
          std::cout << "Database with same ID already exists!" << std::endl;
@@ -111,16 +122,6 @@ void Database::writeEntry(const int& key, const std::string& value){
    }
        
    ReturnCode check = writeDatabaseEntry(this->id, key, value);
-
-   if(check == ReturnCode::SUCCESS){
-      return;
-   }
-   else if(check == ReturnCode::KEY_ALREADY_EXIST){
-      std::cout << "Key already exists!" << std::endl; 
-   }
-   else{
-      std::cout << "Internal server error!" << std::endl;
-   }
 }
 
 void Database::updateEntry(const int& key, const std::string& value){
@@ -131,16 +132,6 @@ void Database::updateEntry(const int& key, const std::string& value){
    }
     
    ReturnCode check = updateDatabaseEntry(this->id, key, value);
-
-   if(check == ReturnCode::SUCCESS){
-      return;
-   }
-   else if(check == ReturnCode::KEY_NOT_FOUND){
-      std::cout << "Key not found!" << std::endl;
-   }
-   else{
-      std::cout << "Internal server error!" << std::endl;
-   }
 }
 
 void Database::deleteEntry(const int& key){
@@ -151,14 +142,4 @@ void Database::deleteEntry(const int& key){
    }
    
    ReturnCode check = deleteDatabaseEntry(this->id, key);
-
-   if(check == ReturnCode::SUCCESS){
-      return;
-   }
-   else if(check == ReturnCode::KEY_NOT_FOUND){
-      std::cout << "Key not found!" << std::endl;
-   }
-   else{
-      std::cout << "Internal server error!" << std::endl;
-   }
 }

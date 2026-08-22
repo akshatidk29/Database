@@ -2,7 +2,9 @@
 #include <string>
 #include <iostream>
 
+#include "return.h"
 #include "method.h"
+#include "store.h"
 #include "database.h"
 #include "transaction.h"
 
@@ -41,20 +43,55 @@ void Transaction::_delete(const int& key){
 // Start Transaction
 void Database::startTransaction(Transaction* txn){
 
-   int numInstructions = txn->instructions.size();
+   if(txn == nullptr || !(this->access) || this->logger == nullptr){
+      std::cout << "Access denied!" << std::endl;
+      return;
+   }
 
    for(Instruction* instruction : txn->instructions){
 
       if(instruction->method == Method::WRITE){
+
+         ReturnCode check = this->logger->addLog(instruction->method, instruction->key, &(instruction->value), nullptr);
+         if(check == ReturnCode::KEY_ALREADY_EXIST){
+               std::cout << "Key already exists!" << std::endl; 
+            }else if(check != ReturnCode::SUCCESS){
+            std::cout << "Internal server error!" << std::endl;
+         }
+
          this->writeEntry(instruction->key, instruction->value);
       }
+
       else if(instruction->method == Method::UPDATE){
+
+         std::string previousValue;
+         ReturnCode previousCheck = readDatabaseEntry(this->id, instruction->key, &previousValue);
+         ReturnCode check = previousCheck == ReturnCode::SUCCESS
+            ? this->logger->addLog(instruction->method, instruction->key, &(instruction->value), &previousValue)
+            : previousCheck;
+         if(check == ReturnCode::KEY_NOT_FOUND){
+               std::cout << "Key not found!" << std::endl; 
+            }else if(check != ReturnCode::SUCCESS){
+            std::cout << "Internal server error!" << std::endl;
+         }
+
          this->updateEntry(instruction->key, instruction->value);
       }
+
       else if(instruction->method == Method::DELETE){
+
+         ReturnCode check = this->logger->addLog(instruction->method, instruction->key, nullptr, nullptr);
+         if(check == ReturnCode::KEY_NOT_FOUND){
+               std::cout << "Key not found!" << std::endl; 
+            }else if(check != ReturnCode::SUCCESS){
+            std::cout << "Internal server error!" << std::endl;
+         }
+         
          this->deleteEntry(instruction->key);
       }
+
       else if(instruction->method == Method::READ){
+
          this->readEntry(instruction->key, instruction->readValue, instruction->printValue);
       }
    }
