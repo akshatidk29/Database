@@ -1,14 +1,13 @@
 #include <fstream>
 #include <iostream>
+#include <filesystem>
 #include "database.h"
 #include "transaction.h"
 
 int main(){
 
+   std::filesystem::create_directories("data");
    std::ofstream databaseStoreOut("data/databaseStore.db", std::ios::app);
-   if(!databaseStoreOut.is_open()){
-      std::ofstream databaseStoreOut("data/databaseStore.db");
-   }
    databaseStoreOut.close();
    
    std::string password = "MyPassword";

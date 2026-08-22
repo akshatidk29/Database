@@ -3,16 +3,18 @@
 
 #include "store.h"
 #include "return.h"
+#include "logger.h"
 #include "database.h"
 
 Database::Database(const int& id, std::string& password, bool create=false)
-   : id(id), password(password), access(false){
+   : logger(nullptr), id(id), password(password), access(false){
 
    if(!create){
       ReturnCode check = authorizeDatabaseAccess(id, password);
       
       if(check == ReturnCode::SUCCESS){
          this->password = password;
+         this->logger = new Logger(this->id);
          std::cout << "Authorized, giving access to database." << std::endl;
          access = true;
       }
@@ -33,6 +35,7 @@ Database::Database(const int& id, std::string& password, bool create=false)
       ReturnCode check = addNewDatabase(id, password);
       if(check == ReturnCode::SUCCESS){
          this->password = password;
+         this->logger = new Logger(this->id);
          std::cout << "Database added!" << std::endl;
          access = true;
       }

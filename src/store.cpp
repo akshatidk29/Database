@@ -1,13 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <string>
 #include <vector>
 
 #include "store.h"
 #include "return.h"
 #include "method.h"
-
-int numDatabases = 0;
 
 ReturnCode checkDatabaseExistence(const int& id)
 {
@@ -41,6 +40,13 @@ ReturnCode checkDatabaseExistence(const int& id)
 
 ReturnCode addNewDatabase(const int& id, const std::string& password)
 {
+   std::error_code directoryError;
+   std::filesystem::create_directories("data", directoryError);
+   if (directoryError)
+   {
+      return ReturnCode::DIRECTORY_ERROR;
+   }
+
    ReturnCode check = checkDatabaseExistence(id);
 
    if (check == ReturnCode::SUCCESS)
@@ -52,8 +58,15 @@ ReturnCode addNewDatabase(const int& id, const std::string& password)
       return check;
    }
 
-   std::string databasePath = "data/" + std::to_string(id) + ".db";
-   std::ofstream databaseFileOut(databasePath, std::ios::app);
+   std::string databaseDirectory = "data/" + std::to_string(id);
+   std::filesystem::create_directories(databaseDirectory, directoryError);
+   if (directoryError)
+   {
+      return ReturnCode::DIRECTORY_ERROR;
+   }
+
+   std::string databaseFilePath = databaseDirectory + "/" + std::to_string(id) + ".db";
+   std::ofstream databaseFileOut(databaseFilePath, std::ios::app);
 
    if (!databaseFileOut.is_open())
    {
@@ -71,8 +84,6 @@ ReturnCode addNewDatabase(const int& id, const std::string& password)
 
    databaseStoreOut << id << ":" << password << std::endl;
    databaseStoreOut.close();
-
-   numDatabases++;
 
    return ReturnCode::SUCCESS;
 }
@@ -180,8 +191,8 @@ ReturnCode readDatabaseEntry(const int& id, const int& key, std::string* value){
       return check;
    }
 
-   std::string databasePath = "data/" + std::to_string(id) + ".db";
-   std::ifstream databaseFileIn(databasePath);
+   std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
+   std::ifstream databaseFileIn(databaseFilePath);
 
    if(!databaseFileIn.is_open()){
       return ReturnCode::DATABASE_FILE_ERROR;
@@ -245,8 +256,8 @@ ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& 
       return check;
    }
 
-   std::string databasePath = "data/" + std::to_string(id) + ".db";
-   std::ofstream databaseFileOut(databasePath, std::ios::app);
+   std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
+   std::ofstream databaseFileOut(databaseFilePath, std::ios::app);
 
    if(!databaseFileOut.is_open()){
       return ReturnCode::DATABASE_FILE_ERROR;
@@ -269,8 +280,8 @@ ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string&
       return check;
    }
 
-   std::string databasePath = "data/" + std::to_string(id) + ".db";
-   std::ofstream databaseFileOut(databasePath, std::ios::app);
+   std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
+   std::ofstream databaseFileOut(databaseFilePath, std::ios::app);
 
    if(!databaseFileOut.is_open()){
       return ReturnCode::DATABASE_FILE_ERROR;
@@ -293,8 +304,8 @@ ReturnCode deleteDatabaseEntry(const int& id, const int& key){
       return check;
    }
 
-   std::string databasePath = "data/" + std::to_string(id) + ".db";
-   std::ofstream databaseFileOut(databasePath, std::ios::app);
+   std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
+   std::ofstream databaseFileOut(databaseFilePath, std::ios::app);
 
    if(!databaseFileOut.is_open()){
       return ReturnCode::DATABASE_FILE_ERROR;
