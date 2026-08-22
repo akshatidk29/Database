@@ -4,15 +4,18 @@
 #include <string>
 #include <iostream>
 
+#include "method.h"
+
 class Instruction{
 public:
    const int key;
    const bool printValue;
    const std::string value;
-   const std::string method;
    std::string* readValue;
 
-   Instruction(const std::string& method, const int& key, const std::string& value, std::string* readValue, const bool& printValue);
+   const Method method;
+
+   Instruction(const Method& method, const int& key, const std::string& value, std::string* readValue, const bool& printValue);
 };
 
 class Transaction{
@@ -20,7 +23,7 @@ private:
    int tid;
    static int id;
 
-   void addInstruction(const std::string& method, const int& key, const std::string& value, std::string* readValue, const bool& printValue);
+   void addInstruction(const Method& method, const int& key, const std::string& value, std::string* readValue, const bool& printValue);
 
 public:
    std::vector<Instruction*> instructions;

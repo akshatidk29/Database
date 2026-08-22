@@ -2,11 +2,12 @@
 #include <string>
 #include <iostream>
 
+#include "method.h"
 #include "database.h"
 #include "transaction.h"
 
 
-Instruction::Instruction(const std::string& method, const int& key, const std::string& value="", std::string* readValue=nullptr, const bool& printValue=false) 
+Instruction::Instruction(const Method& method, const int& key, const std::string& value="", std::string* readValue=nullptr, const bool& printValue=false) 
 : method(method), key(key), value(value), readValue(readValue), printValue(printValue) {}
 
 
@@ -16,23 +17,23 @@ Transaction::Transaction(){
    this->tid = id++;
 }
 
-void Transaction::addInstruction(const std::string& method, const int& key, const std::string& value="", std::string* readValue=nullptr, const bool& printValue=false){
+void Transaction::addInstruction(const Method& method, const int& key, const std::string& value="", std::string* readValue=nullptr, const bool& printValue=false){
    Instruction* i = new Instruction(method, key, value, readValue, printValue);
    this->instructions.push_back(i);
 }
 
 
 void Transaction::_read(const int& key, std::string* readValue, const bool& printValue=false){
-   this->addInstruction("READ", key, "", readValue, printValue);
+   this->addInstruction(Method::READ, key, "", readValue, printValue);
 }
 void Transaction::_write(const int& key, const std::string& value){
-   this->addInstruction("WRITE", key, value);
+   this->addInstruction(Method::WRITE, key, value);
 }
 void Transaction::_update(const int& key, const std::string& value){
-   this->addInstruction("UPDATE", key, value);
+   this->addInstruction(Method::UPDATE, key, value);
 }
 void Transaction::_delete(const int& key){
-   this->addInstruction("DELETE", key);
+   this->addInstruction(Method::DELETE, key);
 }
 
 
@@ -44,16 +45,16 @@ void Database::startTransaction(Transaction* txn){
 
    for(Instruction* instruction : txn->instructions){
 
-      if(instruction->method == "WRITE"){
+      if(instruction->method == Method::WRITE){
          this->writeEntry(instruction->key, instruction->value);
       }
-      else if(instruction->method == "UPDATE"){
+      else if(instruction->method == Method::UPDATE){
          this->updateEntry(instruction->key, instruction->value);
       }
-      else if(instruction->method == "DELETE"){
+      else if(instruction->method == Method::DELETE){
          this->deleteEntry(instruction->key);
       }
-      else if(instruction->method == "READ"){
+      else if(instruction->method == Method::READ){
          this->readEntry(instruction->key, instruction->readValue, instruction->printValue);
       }
    }

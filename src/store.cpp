@@ -5,6 +5,7 @@
 
 #include "store.h"
 #include "return.h"
+#include "method.h"
 
 int numDatabases = 0;
 
@@ -205,15 +206,15 @@ ReturnCode readDatabaseEntry(const int& id, const int& key, std::string* value){
       }
 
       std::string presentKey = line.substr(0, colonPos1);
-      std::string method = line.substr(colonPos1 + 1, colonPos2 - colonPos1 - 1);
+      Method method = getMethod(line.substr(colonPos1 + 1, colonPos2 - colonPos1 - 1));
 
-      if(method == "WRITE" || method == "UPDATE"){
+      if(method == Method::WRITE || method == Method::UPDATE){
          if(presentKey == std::to_string(key)){
             exists = true;
             if(value)
                *value = line.substr(colonPos2 + 1);
          }
-      }else if(method == "DELETE"){
+      }else if(method == Method::DELETE){
          if(presentKey == std::to_string(key)){
             exists = false;
             if(value)
@@ -251,7 +252,7 @@ ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& 
       return ReturnCode::DATABASE_FILE_ERROR;
    }
 
-   databaseFileOut << key << ":WRITE:" << value << std::endl;
+   databaseFileOut << key << ':' << Method::WRITE << ':' << value << std::endl;
    databaseFileOut.close();
 
    return ReturnCode::SUCCESS;
@@ -275,7 +276,7 @@ ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string&
       return ReturnCode::DATABASE_FILE_ERROR;
    }
 
-   databaseFileOut << key << ":UPDATE:" << value << std::endl;
+   databaseFileOut << key << ':' << Method::UPDATE << ':' << value << std::endl;
    databaseFileOut.close();
 
    return ReturnCode::SUCCESS;
@@ -299,7 +300,7 @@ ReturnCode deleteDatabaseEntry(const int& id, const int& key){
       return ReturnCode::DATABASE_FILE_ERROR;
    }
 
-   databaseFileOut << key << ":DELETE:" << std::endl;
+   databaseFileOut << key << ':' << Method::DELETE << ':' << std::endl;
    databaseFileOut.close();
 
    return ReturnCode::SUCCESS;
