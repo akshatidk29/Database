@@ -14,4 +14,5 @@ enum class ReturnCode{
    KEY_ALREADY_EXIST,
    LOG_FILE_ERROR,
    LOG_FILE_CORRUPT_ERROR,
+
 };

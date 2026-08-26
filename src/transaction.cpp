@@ -55,11 +55,11 @@ void Database::startTransaction(Transaction* txn){
          ReturnCode check = this->logger->addLog(instruction->method, instruction->key, &(instruction->value), nullptr);
          if(check == ReturnCode::KEY_ALREADY_EXIST){
                std::cout << "Key already exists!" << std::endl; 
-            }else if(check != ReturnCode::SUCCESS){
+         }else if(check != ReturnCode::SUCCESS){
             std::cout << "Internal server error!" << std::endl;
+         }else{           
+            this->writeEntry(instruction->key, instruction->value);
          }
-
-         this->writeEntry(instruction->key, instruction->value);
       }
 
       else if(instruction->method == Method::UPDATE){
@@ -71,11 +71,11 @@ void Database::startTransaction(Transaction* txn){
             : previousCheck;
          if(check == ReturnCode::KEY_NOT_FOUND){
                std::cout << "Key not found!" << std::endl; 
-            }else if(check != ReturnCode::SUCCESS){
+         }else if(check != ReturnCode::SUCCESS){
             std::cout << "Internal server error!" << std::endl;
+         }else{     
+            this->updateEntry(instruction->key, instruction->value);
          }
-
-         this->updateEntry(instruction->key, instruction->value);
       }
 
       else if(instruction->method == Method::DELETE){
@@ -83,15 +83,14 @@ void Database::startTransaction(Transaction* txn){
          ReturnCode check = this->logger->addLog(instruction->method, instruction->key, nullptr, nullptr);
          if(check == ReturnCode::KEY_NOT_FOUND){
                std::cout << "Key not found!" << std::endl; 
-            }else if(check != ReturnCode::SUCCESS){
+         }else if(check != ReturnCode::SUCCESS){
             std::cout << "Internal server error!" << std::endl;
+         }else{  
+            this->deleteEntry(instruction->key);
          }
-         
-         this->deleteEntry(instruction->key);
       }
 
       else if(instruction->method == Method::READ){
-
          this->readEntry(instruction->key, instruction->readValue, instruction->printValue);
       }
    }
