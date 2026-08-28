@@ -13,12 +13,12 @@ int main(){
 
    std::string* value = new std::string;
 
-   // t1._write(4, "100");
-   // t1._write(5, "200");
-   // t1._write(6, "300");
+   t1._write(4, "100");
+   t1._write(5, "200");
+   t1._write(6, "300");
    t1._read(2, value, true);
-   // t1._write(2, "200");
-   // t1._read(2, value, true);
+   t1._write(2, "200");
+   t1._read(2, value, true);
    t1._delete(2);
    t1._read(2, value, true);
 
@@ -26,6 +26,7 @@ int main(){
    
    return 0;
 }
+
 
 // int main(){
 

@@ -1,11 +1,14 @@
 #pragma once
+
+#include "index.h"
 #include "logger.h"
 #include "transaction.h"
 
 class Database{
 private:
-   Logger* logger;
    const int id;
+   Index* index;
+   Logger* logger;
    std::string password;
 
    bool access;

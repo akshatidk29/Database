@@ -67,7 +67,7 @@ ReturnCode Logger::addLog(Method method, const int& key, const std::string* valu
 
       case Method::WRITE:{
          if(check == ReturnCode::KEY_NOT_FOUND){
-            logFileOut << this->currentLsn << ':' << Method::WRITE << ':' << key << ':' << *value << std::endl;
+            logFileOut << this->currentLsn << ':' << Method::WRITE << ':' << key << ':' << *value << ':' << std::endl;
          }else if(check != ReturnCode::FAILURE){
             return ReturnCode::KEY_ALREADY_EXIST;
          }else{
@@ -78,7 +78,7 @@ ReturnCode Logger::addLog(Method method, const int& key, const std::string* valu
 
       case Method::UPDATE:{
          if(check == ReturnCode::KEY_ALREADY_EXIST){
-            logFileOut << this->currentLsn << ':' << Method::UPDATE << ':' << key << ':' << *prevValue << ':' << *value << std::endl;
+            logFileOut << this->currentLsn << ':' << Method::UPDATE << ':' << key << ':' << *value << ':' << *prevValue << std::endl;
          }else if(check != ReturnCode::FAILURE){
             return ReturnCode::KEY_NOT_FOUND;
          }else{
@@ -89,7 +89,7 @@ ReturnCode Logger::addLog(Method method, const int& key, const std::string* valu
 
       case Method::DELETE:{
          if(check == ReturnCode::KEY_ALREADY_EXIST){
-            logFileOut << this->currentLsn << ':' << Method::DELETE << ':' << key << std::endl;
+            logFileOut << this->currentLsn << ':' << Method::DELETE << ':' << key  << "::" << std::endl;
          }else if(check != ReturnCode::FAILURE){
             return ReturnCode::KEY_NOT_FOUND;
          }else{

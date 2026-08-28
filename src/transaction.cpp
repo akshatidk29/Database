@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "return.h"
+#include "index.h"
 #include "method.h"
 #include "store.h"
 #include "database.h"

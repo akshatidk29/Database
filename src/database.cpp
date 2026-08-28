@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "store.h"
+#include "index.h"
 #include "return.h"
 #include "logger.h"
 #include "database.h"
@@ -15,7 +16,8 @@ Database::Database(const int& id, std::string& password, bool create=false)
       if(check == ReturnCode::SUCCESS){
          this->password = password;
          this->logger = new Logger(this->id);
-         if(this->logger->getStatus()){
+         this->index = new Index(this->id);
+         if(this->logger->getStatus() && this->index->getStatus()){
             std::cout << "Authorized, giving access to database." << std::endl;
             access = true;
          }else{
@@ -42,8 +44,9 @@ Database::Database(const int& id, std::string& password, bool create=false)
 
          this->password = password;
          this->logger = new Logger(this->id);
+         this->index = new Index(this->id);
          
-         if(this->logger->getStatus()){
+         if(this->logger->getStatus() && this->index->getStatus()){
             std::cout << "Database added!" << std::endl;
             access = true;
          }else{
@@ -64,7 +67,6 @@ int Database::getId(){
       std::cout << "Access denied!" << std::endl;
       return -1;
    }
-
    return this->id;
 }
 
@@ -102,12 +104,12 @@ void Database::readEntry(const int& key, std::string* value, const bool& printVa
       return;
    }
 
-   ReturnCode check = readDatabaseEntry(this->id, key, value);
+   ReturnCode idxCheck = this->index->readIndexEntry(key, value);
 
-   if(check == ReturnCode::FAILURE){
+   if(idxCheck == ReturnCode::FAILURE){
       std::cout << "Key not found!" << std::endl;
    }
-   else if(check != ReturnCode::SUCCESS){
+   else if(idxCheck != ReturnCode::SUCCESS){
       std::cout << "Internal server error!" << std::endl;
    }else if(printValue){
       std::cout << key << " : " << *(value) << std::endl;
@@ -120,8 +122,8 @@ void Database::writeEntry(const int& key, const std::string& value){
       std::cout << "Access denied!" << std::endl;
       return;
    }
-       
-   ReturnCode check = writeDatabaseEntry(this->id, key, value);
+   ReturnCode idxCheck = this->index->writeIndexEntry(key, value);    
+   ReturnCode dbCheck = writeDatabaseEntry(this->id, key, value);
 }
 
 void Database::updateEntry(const int& key, const std::string& value){
@@ -130,8 +132,9 @@ void Database::updateEntry(const int& key, const std::string& value){
       std::cout << "Access denied!" << std::endl;
       return;
    }
-    
-   ReturnCode check = updateDatabaseEntry(this->id, key, value);
+   
+   ReturnCode idxCheck = this->index->updateIndexEntry(key, value);
+   ReturnCode dbCheck = updateDatabaseEntry(this->id, key, value);
 }
 
 void Database::deleteEntry(const int& key){
@@ -140,6 +143,6 @@ void Database::deleteEntry(const int& key){
       std::cout << "Access denied!" << std::endl;
       return;
    }
-   
-   ReturnCode check = deleteDatabaseEntry(this->id, key);
+   ReturnCode idxCheck = this->index->deleteIndexEntry(key);
+   ReturnCode dbCheck = deleteDatabaseEntry(this->id, key);
 }

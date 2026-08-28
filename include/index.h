@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include "return.h"
 #include <unordered_map>
 
 class Index{
@@ -15,7 +16,8 @@ public:
    ReturnCode buildIndex();
 
 
-   ReturnCode readIndexEntry(const int& key);
-   ReturnCode writeIndexEntry(const int& key, std::string* value);
-   ReturnCode updateIndexEntry(const int& key, std::string* value);
+   ReturnCode readIndexEntry(const int& key, std::string* value);
+   ReturnCode writeIndexEntry(const int& key, const std::string& value);
+   ReturnCode updateIndexEntry(const int& key, const std::string& value);
+   ReturnCode deleteIndexEntry(const int& key);
 };
