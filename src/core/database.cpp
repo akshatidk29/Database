@@ -1,11 +1,11 @@
 #include <iostream>
 #include <fstream>
 
-#include "store.h"
-#include "index.h"
-#include "return.h"
-#include "logger.h"
-#include "database.h"
+#include "utils/return.h"
+#include "storage/store.h"
+#include "storage/index.h"
+#include "core/database.h"
+#include "storage/logger.h"
 
 Database::Database(const int& id, std::string& password, bool create=false)
    : id(id), password(password), access(false), logger(nullptr), index(nullptr){

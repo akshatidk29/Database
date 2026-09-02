@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <unordered_map>
 
-#include "index.h"
-#include "return.h"
-#include "method.h"
+#include "utils/return.h"
+#include "utils/method.h"
+#include "storage/index.h"
 
 Index::Index(const int& id)
    : id(id), status(false) {

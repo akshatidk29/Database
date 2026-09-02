@@ -2,9 +2,9 @@
 #include <fstream>
 #include <string>
 
-#include "logger.h"
-#include "method.h"
-#include "return.h"
+#include "utils/method.h"
+#include "utils/return.h"
+#include "storage/logger.h"
 
 Logger::Logger(const int& id)
    : id(id), currentLsn(1), status(false) {

@@ -1,8 +1,8 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
-#include "database.h"
-#include "transaction.h"
+#include "core/database.h"
+#include "core/transaction.h"
 
 int main(){
    

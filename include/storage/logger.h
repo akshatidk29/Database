@@ -1,9 +1,10 @@
 #pragma once
+
 #include <string>
 #include <iostream>
 
-#include "return.h"
-#include "method.h"
+#include "utils/return.h"
+#include "utils/method.h"
 
 class Logger{
 private:

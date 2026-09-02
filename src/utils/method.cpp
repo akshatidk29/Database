@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
-#include "method.h"
+
+#include "utils/method.h"
 
 std::ostream& operator<<(std::ostream& os, Method method){
    switch(method){

@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "store.h"
-#include "return.h"
-#include "method.h"
+#include "utils/return.h"
+#include "utils/method.h"
+#include "storage/store.h"
 
 ReturnCode checkDatabaseExistence(const int& id){
    

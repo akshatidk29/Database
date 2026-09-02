@@ -2,12 +2,12 @@
 #include <string>
 #include <iostream>
 
-#include "return.h"
-#include "index.h"
-#include "method.h"
-#include "store.h"
-#include "database.h"
-#include "transaction.h"
+#include "utils/method.h"
+#include "utils/return.h"
+#include "storage/index.h"
+#include "storage/store.h"
+#include "core/database.h"
+#include "core/transaction.h"
 
 
 Instruction::Instruction(const Method& method, const int& key, const std::string& value="", std::string* readValue=nullptr, const bool& printValue=false) 

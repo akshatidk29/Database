@@ -1,8 +1,8 @@
 #pragma once
 
-#include "index.h"
-#include "logger.h"
-#include "transaction.h"
+#include "storage/index.h"
+#include "storage/logger.h"
+#include "core/transaction.h"
 
 class Database{
 private:

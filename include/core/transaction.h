@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-#include "method.h"
+#include "utils/method.h"
 
 class Instruction{
 public:
