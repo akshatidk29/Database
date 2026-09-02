@@ -8,11 +8,11 @@
 #include "return.h"
 #include "method.h"
 
-ReturnCode checkDatabaseExistence(const int& id)
-{
+ReturnCode checkDatabaseExistence(const int& id){
+   
    std::ifstream databaseStoreIn("data/databaseStore.db");
    if(!databaseStoreIn.is_open()){
-      return ReturnCode::DATABASE_STORE_ERROR;
+      return ReturnCode::FAILURE;
    }
 
    std::string line;
@@ -38,8 +38,8 @@ ReturnCode checkDatabaseExistence(const int& id)
    return ReturnCode::FAILURE;
 }
 
-ReturnCode addNewDatabase(const int& id, const std::string& password)
-{
+ReturnCode addNewDatabase(const int& id, const std::string& password){
+
    std::error_code directoryError;
    std::filesystem::create_directories("data", directoryError);
    if (directoryError)
@@ -88,14 +88,13 @@ ReturnCode addNewDatabase(const int& id, const std::string& password)
    return ReturnCode::SUCCESS;
 }
 
-ReturnCode authorizeDatabaseAccess(const int& id, const std::string& password)
-{
+ReturnCode authorizeDatabaseAccess(const int& id, const std::string& password){
 
    std::ifstream databaseStoreIn("data/databaseStore.db");
    std::string line;
 
    if(!databaseStoreIn.is_open()){
-      return ReturnCode::DATABASE_STORE_ERROR;
+      return ReturnCode::FAILURE;
    }
 
    while (std::getline(databaseStoreIn, line))
@@ -123,8 +122,7 @@ ReturnCode authorizeDatabaseAccess(const int& id, const std::string& password)
 }
 
 
-ReturnCode changeDatabasePassword(const int& id, const std::string& previousPassword, const std::string& newPassword)
-{
+ReturnCode changeDatabasePassword(const int& id, const std::string& previousPassword, const std::string& newPassword){
 
    std::ifstream databaseStoreIn("data/databaseStore.db");
 
@@ -179,82 +177,7 @@ ReturnCode changeDatabasePassword(const int& id, const std::string& previousPass
    return ReturnCode::WROND_CREDENTIALS;
 }
 
-
-ReturnCode readDatabaseEntry(const int& id, const int& key, std::string* value){
-   
-   ReturnCode check = checkDatabaseExistence(id);
-   
-   if(check == ReturnCode::FAILURE){
-      return ReturnCode::DATABASE_NOT_FOUND;
-   }
-   else if(check != ReturnCode::SUCCESS){
-      return check;
-   }
-
-   std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
-   std::ifstream databaseFileIn(databaseFilePath);
-
-   if(!databaseFileIn.is_open()){
-      return ReturnCode::DATABASE_FILE_ERROR;
-   }
-
-   std::string line;
-   
-   bool exists = false;
-
-   while(std::getline(databaseFileIn, line)){
-      
-      std::size_t colonPos1 = line.find(':');
-      if(colonPos1 == std::string::npos){
-         databaseFileIn.close();
-         return ReturnCode::DATABASE_FILE_CORRUPT_ERROR;
-      }
-
-      std::size_t colonPos2 = line.find(':', colonPos1 + 1);
-      if(colonPos2 == std::string::npos){
-         databaseFileIn.close();
-         return ReturnCode::DATABASE_FILE_CORRUPT_ERROR;
-      }
-
-      std::string presentKey = line.substr(0, colonPos1);
-      Method method = getMethod(line.substr(colonPos1 + 1, colonPos2 - colonPos1 - 1));
-
-      if(method == Method::WRITE || method == Method::UPDATE){
-         if(presentKey == std::to_string(key)){
-            exists = true;
-            if(value)
-               *value = line.substr(colonPos2 + 1);
-         }
-      }else if(method == Method::DELETE){
-         if(presentKey == std::to_string(key)){
-            exists = false;
-            if(value)
-               *value = "";
-         }
-      }else{
-         databaseFileIn.close();
-         return ReturnCode::DATABASE_FILE_CORRUPT_ERROR;
-      }
-   }
-
-   databaseFileIn.close();
-
-   if(exists){
-      return ReturnCode::SUCCESS;
-   }
-   return ReturnCode::FAILURE;
-}
-
 ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& value){
-
-   ReturnCode check = readDatabaseEntry(id, key, nullptr);
-   
-   if(check == ReturnCode::SUCCESS){
-      return ReturnCode::KEY_ALREADY_EXIST;
-   }
-   if(check != ReturnCode::FAILURE){
-      return check;
-   }
 
    std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
    std::ofstream databaseFileOut(databaseFilePath, std::ios::app);
@@ -271,15 +194,6 @@ ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& 
 
 ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string& value){
 
-   ReturnCode check = readDatabaseEntry(id, key, nullptr);
-   
-   if(check == ReturnCode::FAILURE){
-      return ReturnCode::KEY_NOT_FOUND;
-   }
-   if(check != ReturnCode::SUCCESS){
-      return check;
-   }
-
    std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
    std::ofstream databaseFileOut(databaseFilePath, std::ios::app);
 
@@ -295,15 +209,6 @@ ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string&
 
 ReturnCode deleteDatabaseEntry(const int& id, const int& key){
   
-   ReturnCode check = readDatabaseEntry(id, key, nullptr);
-   
-   if(check == ReturnCode::FAILURE){
-      return ReturnCode::KEY_NOT_FOUND;
-   }
-   if(check != ReturnCode::SUCCESS){
-      return check;
-   }
-
    std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
    std::ofstream databaseFileOut(databaseFilePath, std::ios::app);
 

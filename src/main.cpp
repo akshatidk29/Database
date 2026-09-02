@@ -7,7 +7,7 @@
 int main(){
    
    std::string password = "MyPassword";
-   Database d1(101, password, false);
+   Database d1(101, password, true);
 
    Transaction t1 = Transaction();
 

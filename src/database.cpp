@@ -8,7 +8,7 @@
 #include "database.h"
 
 Database::Database(const int& id, std::string& password, bool create=false)
-   : logger(nullptr), id(id), password(password), access(false){
+   : id(id), password(password), access(false), logger(nullptr), index(nullptr){
 
    if(!create){
       ReturnCode check = authorizeDatabaseAccess(id, password);
@@ -21,7 +21,7 @@ Database::Database(const int& id, std::string& password, bool create=false)
             std::cout << "Authorized, giving access to database." << std::endl;
             access = true;
          }else{
-            std::cout << "Logger error!" << std::endl;
+            std::cout << "Internal server error!" << std::endl;
          }
       }
       else{
@@ -50,7 +50,7 @@ Database::Database(const int& id, std::string& password, bool create=false)
             std::cout << "Database added!" << std::endl;
             access = true;
          }else{
-            std::cout << "Logger error!" << std::endl;
+            std::cout << "Internal server error!" << std::endl;
          }
       }
       else if(check == ReturnCode::FAILURE){
@@ -59,6 +59,11 @@ Database::Database(const int& id, std::string& password, bool create=false)
          std::cout << "Internal server error!" << std::endl; 
       }
    }
+}
+
+Database::~Database() {
+   delete logger;
+   delete index;
 }
 
 int Database::getId(){

@@ -20,6 +20,7 @@ private:
 
 public:
    Database(const int& id, std::string& password, bool create);
+   ~Database();
 
    int  getId();
    void changePassword(std::string& previousPassword, std::string& newPassword);

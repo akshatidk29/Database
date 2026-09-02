@@ -20,6 +20,12 @@ Transaction::Transaction(){
    this->tid = id++;
 }
 
+Transaction::~Transaction() {
+   for (Instruction* instruction : instructions) {
+      delete instruction;
+   }
+}
+
 void Transaction::addInstruction(const Method& method, const int& key, const std::string& value="", std::string* readValue=nullptr, const bool& printValue=false){
    Instruction* i = new Instruction(method, key, value, readValue, printValue);
    this->instructions.push_back(i);
@@ -52,42 +58,49 @@ void Database::startTransaction(Transaction* txn){
    for(Instruction* instruction : txn->instructions){
 
       if(instruction->method == Method::WRITE){
-
-         ReturnCode check = this->logger->addLog(instruction->method, instruction->key, &(instruction->value), nullptr);
-         if(check == ReturnCode::KEY_ALREADY_EXIST){
-               std::cout << "Key already exists!" << std::endl; 
-         }else if(check != ReturnCode::SUCCESS){
-            std::cout << "Internal server error!" << std::endl;
-         }else{           
-            this->writeEntry(instruction->key, instruction->value);
+         std::string dummy;
+         ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &dummy);
+         if(idxCheck == ReturnCode::SUCCESS){
+            std::cout << "Key already exists!" << std::endl; 
+         }else{
+            ReturnCode check = this->logger->addLog(instruction->method, instruction->key, &(instruction->value), nullptr);
+            if(check != ReturnCode::SUCCESS){
+               std::cout << "Internal server error!" << std::endl;
+            }else{           
+               this->writeEntry(instruction->key, instruction->value);
+            }
          }
       }
 
       else if(instruction->method == Method::UPDATE){
 
          std::string previousValue;
-         ReturnCode previousCheck = readDatabaseEntry(this->id, instruction->key, &previousValue);
-         ReturnCode check = previousCheck == ReturnCode::SUCCESS
-            ? this->logger->addLog(instruction->method, instruction->key, &(instruction->value), &previousValue)
-            : previousCheck;
-         if(check == ReturnCode::KEY_NOT_FOUND){
-               std::cout << "Key not found!" << std::endl; 
-         }else if(check != ReturnCode::SUCCESS){
-            std::cout << "Internal server error!" << std::endl;
-         }else{     
-            this->updateEntry(instruction->key, instruction->value);
+         ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &previousValue);
+         if(idxCheck == ReturnCode::FAILURE){
+            std::cout << "Key not found!" << std::endl; 
+         }else{
+            ReturnCode check = this->logger->addLog(instruction->method, instruction->key, &(instruction->value), &previousValue);
+            if(check != ReturnCode::SUCCESS){
+               std::cout << "Internal server error!" << std::endl;
+            }else{     
+               this->updateEntry(instruction->key, instruction->value);
+            }
          }
       }
 
       else if(instruction->method == Method::DELETE){
 
-         ReturnCode check = this->logger->addLog(instruction->method, instruction->key, nullptr, nullptr);
-         if(check == ReturnCode::KEY_NOT_FOUND){
-               std::cout << "Key not found!" << std::endl; 
-         }else if(check != ReturnCode::SUCCESS){
-            std::cout << "Internal server error!" << std::endl;
-         }else{  
-            this->deleteEntry(instruction->key);
+         std::string dummy;
+         ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &dummy);
+         if(idxCheck == ReturnCode::FAILURE){
+            std::cout << "Key not found!" << std::endl; 
+         }else{
+            ReturnCode check = this->logger->addLog(instruction->method, instruction->key, nullptr, nullptr);
+            if(check != ReturnCode::SUCCESS){
+               std::cout << "Internal server error!" << std::endl;
+            }else{  
+               this->deleteEntry(instruction->key);
+            }
          }
       }
 

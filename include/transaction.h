@@ -29,6 +29,7 @@ public:
    std::vector<Instruction*> instructions;
 
    Transaction();
+   ~Transaction();
 
    void _delete(const int& key);
    void _write(const int& key, const std::string& value);

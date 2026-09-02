@@ -5,11 +5,9 @@
 #include "logger.h"
 #include "method.h"
 #include "return.h"
-#include "logStore.h"
 
 Logger::Logger(const int& id)
-   : id(id), currentLsn(1), status(false)
-{
+   : id(id), currentLsn(1), status(false) {
    ReturnCode check = setPath();
    if(check == ReturnCode::SUCCESS){
       this->status = true;
@@ -61,40 +59,20 @@ ReturnCode Logger::addLog(Method method, const int& key, const std::string* valu
       return ReturnCode::LOG_FILE_ERROR;
    }
 
-   ReturnCode check = checkKeyExistence(this->id, key);
-
    switch(method){
 
       case Method::WRITE:{
-         if(check == ReturnCode::KEY_NOT_FOUND){
-            logFileOut << this->currentLsn << ':' << Method::WRITE << ':' << key << ':' << *value << ':' << std::endl;
-         }else if(check != ReturnCode::FAILURE){
-            return ReturnCode::KEY_ALREADY_EXIST;
-         }else{
-            return check;
-         }
+         logFileOut << this->currentLsn << ':' << Method::WRITE << ':' << key << ':' << *value << ':' << std::endl;
          break;
       }
 
       case Method::UPDATE:{
-         if(check == ReturnCode::KEY_ALREADY_EXIST){
-            logFileOut << this->currentLsn << ':' << Method::UPDATE << ':' << key << ':' << *value << ':' << *prevValue << std::endl;
-         }else if(check != ReturnCode::FAILURE){
-            return ReturnCode::KEY_NOT_FOUND;
-         }else{
-            return check;
-         }
+         logFileOut << this->currentLsn << ':' << Method::UPDATE << ':' << key << ':' << *value << ':' << *prevValue << std::endl;
          break;
       }
 
       case Method::DELETE:{
-         if(check == ReturnCode::KEY_ALREADY_EXIST){
-            logFileOut << this->currentLsn << ':' << Method::DELETE << ':' << key  << "::" << std::endl;
-         }else if(check != ReturnCode::FAILURE){
-            return ReturnCode::KEY_NOT_FOUND;
-         }else{
-            return check;
-         }
+         logFileOut << this->currentLsn << ':' << Method::DELETE << ':' << key  << "::" << std::endl;
          break;
       }
 
