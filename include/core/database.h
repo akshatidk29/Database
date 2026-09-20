@@ -18,6 +18,8 @@ private:
    void updateEntry(const int& key, const std::string& value);
    void readEntry(const int& key, std::string* value, const bool& printValue);
 
+   void compactDatabase();
+
 public:
    Database(const int& id, std::string& password, bool create);
    ~Database();

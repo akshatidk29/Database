@@ -177,6 +177,7 @@ ReturnCode changeDatabasePassword(const int& id, const std::string& previousPass
    return ReturnCode::WROND_CREDENTIALS;
 }
 
+
 ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& value){
 
    std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
@@ -186,7 +187,7 @@ ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& 
       return ReturnCode::DATABASE_FILE_ERROR;
    }
 
-   databaseFileOut << key << ':' << Method::WRITE << ':' << value << std::endl;
+   databaseFileOut << key << ':' << value << std::endl;
    databaseFileOut.close();
 
    return ReturnCode::SUCCESS;
@@ -201,7 +202,7 @@ ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string&
       return ReturnCode::DATABASE_FILE_ERROR;
    }
 
-   databaseFileOut << key << ':' << Method::UPDATE << ':' << value << std::endl;
+   databaseFileOut << key << ':' << value << std::endl;
    databaseFileOut.close();
 
    return ReturnCode::SUCCESS;
@@ -216,8 +217,28 @@ ReturnCode deleteDatabaseEntry(const int& id, const int& key){
       return ReturnCode::DATABASE_FILE_ERROR;
    }
 
-   databaseFileOut << key << ':' << Method::DELETE << ':' << std::endl;
+   databaseFileOut << key << ':' << std::endl;
    databaseFileOut.close();
+
+   return ReturnCode::SUCCESS;
+}
+
+
+// For compacting the database from the index
+ReturnCode writeAllDatabaseEntry(const int& id, const std::vector<std::pair<int, std::string>>* dbEntries){
+
+   std::string databaseTempFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".dbt";
+   std::ofstream databaseTempFileOut(databaseTempFilePath);
+
+   for(const std::pair<int, std::string>& entry : *dbEntries){
+      databaseTempFileOut << entry.first << ':' << entry.second << ':' << std::endl;
+   }
+
+   databaseTempFileOut.close();
+
+   std::string databaseFilePath = "data/" + std::to_string(id) + "/" + std::to_string(id) + ".db";
+   std::remove(databaseFilePath.c_str());
+   std::rename(databaseTempFilePath.c_str(), databaseFilePath.c_str());
 
    return ReturnCode::SUCCESS;
 }

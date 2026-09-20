@@ -22,3 +22,4 @@ ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& 
 
 ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string& value);
 
+ReturnCode writeAllDatabaseEntry(const int& id, const std::vector<std::pair<int, std::string>>* dbEntries);

@@ -23,6 +23,59 @@ bool Index::getStatus(){
 
 ReturnCode Index::buildIndex(){
 
+   ReturnCode dataCheck = readDataFile();
+
+   if(dataCheck == ReturnCode::SUCCESS){
+
+      ReturnCode logCheck = readLogFile();
+
+      if(logCheck == ReturnCode::SUCCESS){
+         return ReturnCode::SUCCESS;
+      }
+
+      return ReturnCode::FAILURE;
+   }
+
+   return ReturnCode::FAILURE;
+}
+
+ReturnCode Index::readDataFile(){
+   
+   std::string databaseDataName = std::to_string(id) + ".db";
+   std::string databaseDataPath =  "data/" + std::to_string(id) + "/" + databaseDataName;
+
+   std::ifstream databaseDataFileIn(databaseDataPath);
+   if(!databaseDataFileIn.is_open()){
+      return ReturnCode::DATABASE_FILE_ERROR;
+   }
+   
+   std::string line;
+
+   while(std::getline(databaseDataFileIn, line)){
+      
+      std::size_t colonPos1 = line.find(':');
+      if(colonPos1 == std::string::npos){
+         databaseDataFileIn.close();
+         return ReturnCode::DATABASE_FILE_CORRUPT_ERROR;
+      }
+
+      std::size_t colonPos2 = line.find(':', colonPos1 + 1);
+      if(colonPos2 == std::string::npos){
+         databaseDataFileIn.close();
+         return ReturnCode::DATABASE_FILE_CORRUPT_ERROR;
+      }
+      
+      int key = atoi(line.substr(0, colonPos1).c_str());
+      std::string value = line.substr(colonPos1 + 1, colonPos2 - colonPos1 - 1);
+      
+      this->index[key] = value;
+   }
+
+   databaseDataFileIn.close();
+   return ReturnCode::SUCCESS;
+}
+
+ReturnCode Index::readLogFile(){
    std::string databaseLogName = std::to_string(id) + ".log";
    std::string databaseLogPath =  "data/" + std::to_string(id) + "/" + databaseLogName;
 
@@ -31,7 +84,6 @@ ReturnCode Index::buildIndex(){
       return ReturnCode::LOG_FILE_ERROR;
    }
 
-   bool exists = false;
    std::string line;
 
    while(std::getline(databaseLogFileIn, line)){
@@ -121,4 +173,38 @@ ReturnCode Index::deleteIndexEntry(const int& key){
    else{
       return ReturnCode::KEY_NOT_FOUND;
    }
+}
+
+ReturnCode Index::getNextEntry(std::pair<int, std::string>* nextEntry){
+   
+   if(this->index.empty()){
+      return ReturnCode::FAILURE;
+   }
+
+   static std::unordered_map<int, std::string>::iterator it = this->index.begin();
+
+   if(it == this->index.end()){
+      it = this->index.begin();
+      return ReturnCode::FAILURE;
+   }
+
+   nextEntry->first = it->first;
+   nextEntry->second = it->second;
+
+   it++;
+
+   return ReturnCode::SUCCESS;
+}
+
+ReturnCode Index::getAllEntries(std::vector<std::pair<int, std::string>>* entries){
+   
+   if(entries == nullptr){
+      return ReturnCode::FAILURE;
+   }
+
+   for(const std::pair<int, std::string>& entry : this->index){
+      entries->push_back(entry);
+   }
+
+   return ReturnCode::SUCCESS;
 }

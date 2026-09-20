@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 
 #include "utils/return.h"
 #include "storage/store.h"
@@ -62,6 +63,7 @@ Database::Database(const int& id, std::string& password, bool create=false)
 }
 
 Database::~Database() {
+   compactDatabase();
    delete logger;
    delete index;
 }
@@ -128,7 +130,6 @@ void Database::writeEntry(const int& key, const std::string& value){
       return;
    }
    ReturnCode idxCheck = this->index->writeIndexEntry(key, value);    
-   ReturnCode dbCheck = writeDatabaseEntry(this->id, key, value);
 }
 
 void Database::updateEntry(const int& key, const std::string& value){
@@ -139,7 +140,6 @@ void Database::updateEntry(const int& key, const std::string& value){
    }
    
    ReturnCode idxCheck = this->index->updateIndexEntry(key, value);
-   ReturnCode dbCheck = updateDatabaseEntry(this->id, key, value);
 }
 
 void Database::deleteEntry(const int& key){
@@ -149,5 +149,37 @@ void Database::deleteEntry(const int& key){
       return;
    }
    ReturnCode idxCheck = this->index->deleteIndexEntry(key);
-   ReturnCode dbCheck = deleteDatabaseEntry(this->id, key);
+}
+
+
+void Database::compactDatabase(){
+  
+   if(!(this->access)){
+      std::cout << "Access denied!" << std::endl;
+      return;
+   }
+   
+   std::cout << "Compacting database!" << std::endl;
+
+   std::vector<std::pair<int, std::string>> dbEntries;
+
+   ReturnCode idxCheck = this->index->getAllEntries(&dbEntries);
+
+   if(idxCheck != ReturnCode::SUCCESS){
+      std::cout << "Internal server error!" << std::endl;
+      return;
+   }
+   
+   ReturnCode dbCheck = writeAllDatabaseEntry(this->id, &dbEntries);
+   if(dbCheck != ReturnCode::SUCCESS){
+      std::cout << "Internal server error!" << std::endl;
+      return;
+   }
+
+   ReturnCode logCheck = this->logger->clearLogFile();
+   
+   if(logCheck != ReturnCode::SUCCESS){
+      std::cout << "Internal server error!" << std::endl;
+      return;
+   }
 }
