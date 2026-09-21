@@ -16,10 +16,14 @@ ReturnCode authorizeDatabaseAccess(const int& id, const std::string& password);
 ReturnCode changeDatabasePassword(const int& id, const std::string& previousPassword, const std::string& newPassword);
 
 
+
+
 ReturnCode deleteDatabaseEntry(const int& id, const int& key);
 
 ReturnCode writeDatabaseEntry(const int& id, const int& key, const std::string& value);
 
 ReturnCode updateDatabaseEntry(const int& id, const int& key, const std::string& value);
+
+
 
 ReturnCode writeAllDatabaseEntry(const int& id, const std::vector<std::pair<int, std::string>>* dbEntries);

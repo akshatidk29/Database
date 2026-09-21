@@ -13,4 +13,5 @@ enum class Method{
 
 
 Method getMethod(const std::string& str);
+std::string getMethodStr(const Method& method);
 std::ostream& operator<<(std::ostream& os, Method method);

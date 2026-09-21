@@ -15,11 +15,15 @@ private:
    
 public:
    Logger(const int& id);
+
+   int getLSN(); 
    bool getStatus();
-   ReturnCode setLSN();
-   int getLSN();
+   
    ReturnCode setPath();
-   ReturnCode addLog(Method method, const int& key, const std::string* value, const std::string* prevValue);
+   ReturnCode setLSN();
+
+   std::string getInstructionLog(Method method, const int& key, const std::string* value, const std::string* prevValue);
+   ReturnCode addTransactionLogs(std::vector<std::string> &logs);
    
    ReturnCode clearLogFile();
 };

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <vector>
 
 #include "utils/method.h"
 #include "utils/return.h"
@@ -56,37 +57,46 @@ ReturnCode Logger::setPath(){
    return setLSN();
 }
 
-ReturnCode Logger::addLog(Method method, const int& key, const std::string* value, const std::string* prevValue){
+std::string Logger::getInstructionLog(Method method, const int& key, const std::string* value, const std::string* prevValue){
    
-   std::ofstream logFileOut(this->logFilePath, std::ios::app);
-   if(!logFileOut.is_open()){
-      return ReturnCode::LOG_FILE_ERROR;
-   }
+   std::string log;
 
    switch(method){
 
       case Method::WRITE:{
-         logFileOut << this->currentLsn << ':' << Method::WRITE << ':' << key << ':' << *value << ':' << std::endl;
+         log = std::to_string(this->currentLsn) + std::string(":") + getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":") + *value + std::string("::");
          break;
       }
 
       case Method::UPDATE:{
-         logFileOut << this->currentLsn << ':' << Method::UPDATE << ':' << key << ':' << *value << ':' << *prevValue << std::endl;
+         log = std::to_string(this->currentLsn) + std::string(":") + getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":") + *value + std::string(":") + *prevValue + std::string(":");
          break;
       }
 
       case Method::DELETE:{
-         logFileOut << this->currentLsn << ':' << Method::DELETE << ':' << key  << "::" << std::endl;
+         log = std::to_string(this->currentLsn) + std::string(":") + getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":::");
          break;
       }
 
       default:{
-         return ReturnCode::FAILURE;
+         return "";
       }
    }
 
-   logFileOut.close();
    this->currentLsn++;
+   return log;
+}
+
+ReturnCode Logger::addTransactionLogs(std::vector<std::string> &logs){
+   std::ofstream logFileOut(this->logFilePath, std::ios::app);
+   if(!logFileOut.is_open())
+      return ReturnCode::LOG_FILE_ERROR;
+   
+   for(std::string log : logs){
+      logFileOut << log << std::endl;
+   }
+
+   logFileOut.close();
    return ReturnCode::SUCCESS;
 }
 

@@ -55,6 +55,9 @@ void Database::startTransaction(Transaction* txn){
       return;
    }
 
+   std::string log;
+   std::vector<std::string> logs;
+
    for(Instruction* instruction : txn->instructions){
 
       if(instruction->method == Method::WRITE){
@@ -63,11 +66,11 @@ void Database::startTransaction(Transaction* txn){
          if(idxCheck == ReturnCode::SUCCESS){
             std::cout << "Key already exists!" << std::endl; 
          }else{
-            ReturnCode check = this->logger->addLog(instruction->method, instruction->key, &(instruction->value), nullptr);
-            if(check != ReturnCode::SUCCESS){
+            log = this->logger->getInstructionLog(instruction->method, instruction->key, &(instruction->value), nullptr);
+            if(log == ""){
                std::cout << "Internal server error!" << std::endl;
-            }else{           
-               this->writeEntry(instruction->key, instruction->value);
+            }else{
+               logs.push_back(log);
             }
          }
       }
@@ -79,11 +82,11 @@ void Database::startTransaction(Transaction* txn){
          if(idxCheck == ReturnCode::FAILURE){
             std::cout << "Key not found!" << std::endl; 
          }else{
-            ReturnCode check = this->logger->addLog(instruction->method, instruction->key, &(instruction->value), &previousValue);
-            if(check != ReturnCode::SUCCESS){
+            log = this->logger->getInstructionLog(instruction->method, instruction->key, &(instruction->value), &previousValue);
+            if(log == ""){
                std::cout << "Internal server error!" << std::endl;
-            }else{     
-               this->updateEntry(instruction->key, instruction->value);
+            }else{
+               logs.push_back(log);
             }
          }
       }
@@ -95,19 +98,36 @@ void Database::startTransaction(Transaction* txn){
          if(idxCheck == ReturnCode::FAILURE){
             std::cout << "Key not found!" << std::endl; 
          }else{
-            ReturnCode check = this->logger->addLog(instruction->method, instruction->key, nullptr, nullptr);
-            if(check != ReturnCode::SUCCESS){
+            log = this->logger->getInstructionLog(instruction->method, instruction->key, nullptr, nullptr);
+            if(log == ""){
                std::cout << "Internal server error!" << std::endl;
-            }else{  
-               this->deleteEntry(instruction->key);
+            }else{
+               logs.push_back(log);
             }
          }
       }
-
-      else if(instruction->method == Method::READ){
-         this->readEntry(instruction->key, instruction->readValue, instruction->printValue);
-      }
    }
 
-   std::cout << "Transaction completed!" << std::endl;
+   ReturnCode logCheck = this->logger->addTransactionLogs(logs);
+
+   if(logCheck == ReturnCode::SUCCESS){
+
+      for(Instruction* instruction : txn->instructions){
+
+         if(instruction->method == Method::WRITE){
+            this->writeEntry(instruction->key, instruction->value);
+         }else if(instruction->method == Method::UPDATE){
+            this->updateEntry(instruction->key, instruction->value);
+         }else if(instruction->method == Method::DELETE){
+            this->deleteEntry(instruction->key);
+         }else if(instruction->method == Method::READ){
+            this->readEntry(instruction->key, instruction->readValue, instruction->printValue);
+         }
+      }
+
+      std::cout << "Transaction completed!" << std::endl;
+
+   }else{
+      std::cout << "Transaction failed!" << std::endl;
+   }
 }

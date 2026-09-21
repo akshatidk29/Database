@@ -28,3 +28,18 @@ Method getMethod(const std::string& str) {
       return Method::DELETE;
    return Method::ERR;
 }
+
+std::string getMethodStr(const Method& method){
+   switch(method){
+      case Method::READ: 
+         return "READ";
+      case Method::WRITE: 
+         return "WRITE";
+      case Method::UPDATE: 
+         return "UPDATE";
+      case Method::DELETE: 
+         return "DELETE";
+      default: 
+         return "ERR";
+   }
+}
