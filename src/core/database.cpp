@@ -16,8 +16,8 @@ Database::Database(const int& id, std::string& password, bool create=false)
       
       if(check == ReturnCode::SUCCESS){
          this->password = password;
-         this->logger = new Logger(this->id);
          this->index = new Index(this->id);
+         this->logger = new Logger(this->id);
          if(this->logger->getStatus() && this->index->getStatus()){
             std::cout << "Authorized, giving access to database." << std::endl;
             access = true;
@@ -44,8 +44,8 @@ Database::Database(const int& id, std::string& password, bool create=false)
       if(check == ReturnCode::SUCCESS){
 
          this->password = password;
-         this->logger = new Logger(this->id);
          this->index = new Index(this->id);
+         this->logger = new Logger(this->id);
          
          if(this->logger->getStatus() && this->index->getStatus()){
             std::cout << "Database added!" << std::endl;

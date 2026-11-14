@@ -31,6 +31,7 @@ public:
    Transaction();
    ~Transaction();
 
+   static void setNextTid(const int& nextId);
    int getTid();
    void _delete(const int& key);
    void _write(const int& key, const std::string& value);

@@ -1,6 +1,8 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "utils/method.h"
 #include "utils/return.h"
@@ -28,6 +30,12 @@ Transaction::~Transaction() {
 
 int Transaction::getTid(){
    return this->tid;
+}
+
+void Transaction::setNextTid(const int& nextId){
+   if(nextId > id){
+      id = nextId;
+   }
 }
 
 void Transaction::addInstruction(const Method& method, const int& key, const std::string& value="", std::string* readValue=nullptr, const bool& printValue=false){
@@ -61,20 +69,41 @@ void Database::startTransaction(Transaction* txn){
 
    std::string log;
    std::vector<std::string> logs;
+   std::unordered_map<int, std::string> memoryIndex;
+   std::unordered_set<int> deletedKeys;
 
    for(Instruction* instruction : txn->instructions){
 
       if(instruction->method == Method::WRITE){
-         std::string dummy;
-         ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &dummy);
-         if(idxCheck == ReturnCode::SUCCESS){
+         bool exists = false;
+         if(deletedKeys.count(instruction->key)){
+            exists = false;
+         }else if(memoryIndex.count(instruction->key)){
+            exists = true;
+         }else{
+            std::string dummy;
+            ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &dummy);
+            if(idxCheck == ReturnCode::SUCCESS){
+               exists = true;
+            }
+         }
+
+         if(exists){
             std::cout << "Key already exists!" << std::endl; 
+            this->logger->addAbortLog(txn->getTid());
+            std::cout << "Transaction aborted!" << std::endl;
+            return;
          }else{
             log = this->logger->getInstructionLog(instruction->method, instruction->key, &(instruction->value), nullptr);
             if(log == ""){
                std::cout << "Internal server error!" << std::endl;
+               this->logger->addAbortLog(txn->getTid());
+               std::cout << "Transaction aborted!" << std::endl;
+               return;
             }else{
                logs.push_back(log);
+               memoryIndex[instruction->key] = instruction->value;
+               deletedKeys.erase(instruction->key);
             }
          }
       }
@@ -82,31 +111,71 @@ void Database::startTransaction(Transaction* txn){
       else if(instruction->method == Method::UPDATE){
 
          std::string previousValue;
-         ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &previousValue);
-         if(idxCheck == ReturnCode::FAILURE){
+         bool exists = false;
+
+         if(deletedKeys.count(instruction->key)){
+            exists = false;
+         }else if(memoryIndex.count(instruction->key)){
+            exists = true;
+            previousValue = memoryIndex[instruction->key];
+         }else{
+            ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &previousValue);
+            if(idxCheck == ReturnCode::SUCCESS){
+               exists = true;
+            }
+         }
+
+         if(!exists){
             std::cout << "Key not found!" << std::endl; 
+            this->logger->addAbortLog(txn->getTid());
+            std::cout << "Transaction aborted!" << std::endl;
+            return;
          }else{
             log = this->logger->getInstructionLog(instruction->method, instruction->key, &(instruction->value), &previousValue);
             if(log == ""){
                std::cout << "Internal server error!" << std::endl;
+               this->logger->addAbortLog(txn->getTid());
+               std::cout << "Transaction aborted!" << std::endl;
+               return;
             }else{
                logs.push_back(log);
+               memoryIndex[instruction->key] = instruction->value;
             }
          }
       }
 
       else if(instruction->method == Method::DELETE){
 
-         std::string dummy;
-         ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &dummy);
-         if(idxCheck == ReturnCode::FAILURE){
+         bool exists = false;
+
+         if(deletedKeys.count(instruction->key)){
+            exists = false;
+         }else if(memoryIndex.count(instruction->key)){
+            exists = true;
+         }else{
+            std::string dummy;
+            ReturnCode idxCheck = this->index->readIndexEntry(instruction->key, &dummy);
+            if(idxCheck == ReturnCode::SUCCESS){
+               exists = true;
+            }
+         }
+
+         if(!exists){
             std::cout << "Key not found!" << std::endl; 
+            this->logger->addAbortLog(txn->getTid());
+            std::cout << "Transaction aborted!" << std::endl;
+            return;
          }else{
             log = this->logger->getInstructionLog(instruction->method, instruction->key, nullptr, nullptr);
             if(log == ""){
                std::cout << "Internal server error!" << std::endl;
+               this->logger->addAbortLog(txn->getTid());
+               std::cout << "Transaction aborted!" << std::endl;
+               return;
             }else{
                logs.push_back(log);
+               memoryIndex.erase(instruction->key);
+               deletedKeys.insert(instruction->key);
             }
          }
       }

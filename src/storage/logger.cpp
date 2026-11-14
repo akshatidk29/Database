@@ -103,13 +103,26 @@ ReturnCode Logger::addTransactionLogs(const int &tid, std::vector<std::string> &
    return ReturnCode::SUCCESS;
 }
 
-ReturnCode Logger::clearLogFile(){
-   std::ofstream logFileOut(this->logFilePath, std::ios::trunc);
-   if(!logFileOut.is_open()){
+ReturnCode Logger::addAbortLog(const int &tid){
+   std::ofstream logFileOut(this->logFilePath, std::ios::app);
+   if(!logFileOut.is_open())
       return ReturnCode::LOG_FILE_ERROR;
-   }
+
+   logFileOut << std::to_string(this->currentLsn) << ":TXN-START:" + std::to_string(tid) << ":" << std::endl;
+   this->currentLsn++;
+   logFileOut << std::to_string(this->currentLsn) << ":TXN-ABORT:" + std::to_string(tid) << ":" << std::endl;
+   this->currentLsn++;
    logFileOut.close();
-   this->currentLsn = 1;
+   return ReturnCode::SUCCESS;
+}
+
+ReturnCode Logger::clearLogFile(){
+   // std::ofstream logFileOut(this->logFilePath, std::ios::trunc);
+   // if(!logFileOut.is_open()){
+   //    return ReturnCode::LOG_FILE_ERROR;
+   // }
+   // logFileOut.close();
+   // this->currentLsn = 1;
    return ReturnCode::SUCCESS;
 }
 

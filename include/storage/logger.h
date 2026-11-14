@@ -24,5 +24,6 @@ public:
    
    std::string getInstructionLog(Method method, const int &key, const std::string *value, const std::string *prevValue);
    ReturnCode addTransactionLogs(const int &tid, std::vector<std::string> &logs);
+   ReturnCode addAbortLog(const int &tid);
    ReturnCode clearLogFile();
 };
