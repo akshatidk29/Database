@@ -21,9 +21,8 @@ public:
    
    ReturnCode setPath();
    ReturnCode setLSN();
-
-   std::string getInstructionLog(Method method, const int& key, const std::string* value, const std::string* prevValue);
-   ReturnCode addTransactionLogs(std::vector<std::string> &logs);
    
+   std::string getInstructionLog(Method method, const int &key, const std::string *value, const std::string *prevValue);
+   ReturnCode addTransactionLogs(const int &tid, std::vector<std::string> &logs);
    ReturnCode clearLogFile();
 };

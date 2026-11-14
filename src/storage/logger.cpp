@@ -63,39 +63,42 @@ std::string Logger::getInstructionLog(Method method, const int& key, const std::
 
    switch(method){
 
-      case Method::WRITE:{
-         log = std::to_string(this->currentLsn) + std::string(":") + getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":") + *value + std::string("::");
-         break;
-      }
+       case Method::WRITE:{
+          log = getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":") + *value + std::string("::");
+          break;
+       }
 
-      case Method::UPDATE:{
-         log = std::to_string(this->currentLsn) + std::string(":") + getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":") + *value + std::string(":") + *prevValue + std::string(":");
-         break;
-      }
+       case Method::UPDATE:{
+          log = getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":") + *value + std::string(":") + *prevValue + std::string(":");
+          break;
+       }
 
-      case Method::DELETE:{
-         log = std::to_string(this->currentLsn) + std::string(":") + getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":::");
-         break;
-      }
+       case Method::DELETE:{
+          log = getMethodStr(method) + std::string(":") + std::to_string(key) + std::string(":::");
+          break;
+       }
 
-      default:{
-         return "";
-      }
+       default:{
+          return "";
+       }
    }
 
-   this->currentLsn++;
    return log;
 }
 
-ReturnCode Logger::addTransactionLogs(std::vector<std::string> &logs){
+ReturnCode Logger::addTransactionLogs(const int &tid, std::vector<std::string> &logs){
    std::ofstream logFileOut(this->logFilePath, std::ios::app);
    if(!logFileOut.is_open())
       return ReturnCode::LOG_FILE_ERROR;
-   
-   for(std::string log : logs){
-      logFileOut << log << std::endl;
-   }
 
+   logFileOut << std::to_string(this->currentLsn) << ":TXN-START:" + std::to_string(tid) << ":" << std::endl;
+   this->currentLsn++;
+   for(std::string log : logs){
+      logFileOut << std::to_string(this->currentLsn) << ":" << log << std::endl;
+      this->currentLsn++;
+   }
+   logFileOut << std::to_string(this->currentLsn) << ":TXN-END:" + std::to_string(tid) << ":" << std::endl;
+   this->currentLsn++;
    logFileOut.close();
    return ReturnCode::SUCCESS;
 }

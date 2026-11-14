@@ -26,6 +26,10 @@ Transaction::~Transaction() {
    }
 }
 
+int Transaction::getTid(){
+   return this->tid;
+}
+
 void Transaction::addInstruction(const Method& method, const int& key, const std::string& value="", std::string* readValue=nullptr, const bool& printValue=false){
    Instruction* i = new Instruction(method, key, value, readValue, printValue);
    this->instructions.push_back(i);
@@ -108,7 +112,7 @@ void Database::startTransaction(Transaction* txn){
       }
    }
 
-   ReturnCode logCheck = this->logger->addTransactionLogs(logs);
+   ReturnCode logCheck = this->logger->addTransactionLogs(txn->getTid(), logs);
 
    if(logCheck == ReturnCode::SUCCESS){
 

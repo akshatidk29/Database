@@ -175,10 +175,9 @@ void Database::compactDatabase(){
       std::cout << "Internal server error!" << std::endl;
       return;
    }
-
-   ReturnCode logCheck = this->logger->clearLogFile();
+   ReturnCode logClearCheck = this->logger->clearLogFile();
    
-   if(logCheck != ReturnCode::SUCCESS){
+   if(logClearCheck != ReturnCode::SUCCESS){
       std::cout << "Internal server error!" << std::endl;
       return;
    }
