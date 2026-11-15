@@ -63,9 +63,15 @@ Database::Database(const int& id, std::string& password, bool create=false)
 }
 
 Database::~Database() {
-   compactDatabase();
+   if(this->access){
+      compactDatabase();
+   }
    delete logger;
    delete index;
+}
+
+bool Database::getAccess(){
+   return this->access;
 }
 
 int Database::getId(){

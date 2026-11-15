@@ -35,6 +35,10 @@ std::vector<std::string> Shell::tokenizer(std::string command){
         tokens.push_back(currentToken);
     }
 
+    if(tokens.empty()){
+        return tokens;
+    }
+
     for(char &c : tokens[0]){
         if(c >= 'a' && c <= 'z')
             c = c - 32;
@@ -48,24 +52,30 @@ std::string Shell::getCommandLine(){
     
     if(!this->db) 
         p = "db> ";
+    else if(this->txn)
+        p = "db[" + std::to_string(this->db->getId()) + "](txn)> ";
     else
         p = "db[" + std::to_string(this->db->getId()) + "]> ";
 
     std::string command;
     std::cout << p;
-    std::getline(std::cin, command);
+    if(!std::getline(std::cin, command)){
+        return "EXIT";
+    }
     return command;
 }
 
 void Shell::start(){
 
     std::string *dummy = new std::string;
+    this->db = nullptr;
+    this->txn = nullptr;
 
     while(true){
         std::string commandLine = getCommandLine();
         std::vector<std::string> tokens = tokenizer(commandLine);
         if(tokens.empty()) 
-            getCommandLine();
+            continue;
 
         Command cmd = getCommand(tokens[0]);
 
@@ -75,8 +85,13 @@ void Shell::start(){
                     std::cout << "You are already connected to a database" << std::endl;
                 else if(tokens.size() != 3)
                     std::cout << "Usage: CREATE <DATABASE-NAME> <Password>" << std::endl;
-                else
+                else{
                     this->db = new Database(atoi(tokens[1].c_str()), tokens[2], true);
+                    if(!this->db->getAccess()){
+                        delete this->db;
+                        this->db = nullptr;
+                    }
+                }
                 break;
             }
             case Command::CONNECT:{
@@ -84,22 +99,33 @@ void Shell::start(){
                     std::cout << "You are already connected to a database" << std::endl;
                 else if(tokens.size() != 3)
                     std::cout << "Usage: CONNECT <DATABASE-ID> <Password>" << std::endl;
-                else
+                else{
                     this->db = new Database(atoi(tokens[1].c_str()), tokens[2], false);
+                    if(!this->db->getAccess()){
+                        delete this->db;
+                        this->db = nullptr;
+                    }
+                }
                 break;
             }
             case Command::DISCONNECT:{
                 if(!this->db)
                     std::cout << "You are not connected to any database" << std::endl;
                 else{
+                    if(this->txn){
+                        delete this->txn;
+                        this->txn = nullptr;
+                    }
                     delete this->db;
                     this->db = nullptr;
                 }
                 break;
             }
             case Command::READ:{
-                if(!this->db)
+                if(!this->db){
                     std::cout << "You are not connected to any database" << std::endl;
+                    break;
+                }
                 if(txn){
                     if(tokens.size() != 2)
                         std::cout << "Usage: READ <key>" << std::endl;
@@ -115,8 +141,10 @@ void Shell::start(){
                 break;
             }
             case Command::WRITE:{
-                if(!this->db)
+                if(!this->db){
                     std::cout << "You are not connected to any database" << std::endl;
+                    break;
+                }
                 if(this->txn){
                     if(tokens.size() != 3)
                         std::cout << "Usage: WRITE <key> <value>" << std::endl;
@@ -132,8 +160,10 @@ void Shell::start(){
                 break;
             }
             case Command::UPDATE:{
-                if(!this->db)
+                if(!this->db){
                     std::cout << "You are not connected to any database" << std::endl;
+                    break;
+                }
                 if(this->txn){
                     if(tokens.size() != 3)
                         std::cout << "Usage: UPDATE <key> <value>" << std::endl;
@@ -149,8 +179,10 @@ void Shell::start(){
                 break;
             }
             case Command::DELETE:{
-                if(!this->db)
+                if(!this->db){
                     std::cout << "You are not connected to any database" << std::endl;
+                    break;
+                }
                 if(this->txn){
                     if(tokens.size() != 2)
                         std::cout << "Usage: DELETE <key>" << std::endl;
@@ -166,11 +198,15 @@ void Shell::start(){
                 break;
             }
             case Command::BEGIN:{
-                if(!this->db)
+                if(!this->db){
                     std::cout << "You are not connected to any database" << std::endl;
-                else{
-                    this->txn = new Transaction();
+                    break;
                 }
+                if(this->txn){
+                    std::cout << "Transaction already in progress! Use COMMIT first." << std::endl;
+                    break;
+                }
+                this->txn = new Transaction();
                 break;
             }
             case Command::COMMIT:{

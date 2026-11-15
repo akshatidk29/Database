@@ -117,12 +117,12 @@ ReturnCode Logger::addAbortLog(const int &tid){
 }
 
 ReturnCode Logger::clearLogFile(){
-   // std::ofstream logFileOut(this->logFilePath, std::ios::trunc);
-   // if(!logFileOut.is_open()){
-   //    return ReturnCode::LOG_FILE_ERROR;
-   // }
-   // logFileOut.close();
-   // this->currentLsn = 1;
+   std::ofstream logFileOut(this->logFilePath, std::ios::trunc);
+   if(!logFileOut.is_open()){
+      return ReturnCode::LOG_FILE_ERROR;
+   }
+   logFileOut.close();
+   this->currentLsn = 1;
    return ReturnCode::SUCCESS;
 }
 

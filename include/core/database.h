@@ -25,6 +25,7 @@ public:
    ~Database();
 
    int  getId();
+   bool getAccess();
    void changePassword(std::string& previousPassword, std::string& newPassword);
    
    void startTransaction(Transaction* txn);

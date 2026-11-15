@@ -19,6 +19,8 @@ ReturnCode checkDatabaseExistence(const int& id){
 
    while (std::getline(databaseStoreIn, line))
    {
+      if(line.empty()) 
+         continue;
       std::size_t colonPos = line.find(':');
       if (colonPos == std::string::npos)
       {  
@@ -74,6 +76,14 @@ ReturnCode addNewDatabase(const int& id, const std::string& password){
    }
 
    databaseFileOut.close();
+
+   std::string databaseLogPath = databaseDirectory + "/" + std::to_string(id) + ".log";
+   std::ofstream databaseLogOut(databaseLogPath, std::ios::app);
+
+   if (!databaseLogOut.is_open())
+      return ReturnCode::LOG_FILE_ERROR;
+
+   databaseLogOut.close();
    
    std::ofstream databaseStoreOut("data/databaseStore.db", std::ios::app);
 
@@ -99,7 +109,8 @@ ReturnCode authorizeDatabaseAccess(const int& id, const std::string& password){
 
    while (std::getline(databaseStoreIn, line))
    {
-
+      if(line.empty()) 
+         continue;
       std::size_t colonPos = line.find(':');
       if (colonPos == std::string::npos)
       {
@@ -137,6 +148,8 @@ ReturnCode changeDatabasePassword(const int& id, const std::string& previousPass
 
    while (std::getline(databaseStoreIn, line))
    {
+      if(line.empty()) 
+         continue;
       std::size_t colonPos = line.find(':');
       if (colonPos == std::string::npos)
       {
