@@ -1,5 +1,5 @@
-database: build/main.o build/shell.o build/database.o build/store.o build/transaction.o build/method.o build/logger.o build/index.o
-	g++ build/main.o build/shell.o build/database.o build/store.o build/transaction.o build/method.o build/logger.o build/index.o -o database
+database: build/main.o build/shell.o build/database.o build/store.o build/transaction.o build/command.o build/method.o build/logger.o build/index.o
+	g++ build/main.o build/shell.o build/database.o build/store.o build/transaction.o build/command.o build/method.o build/logger.o build/index.o -o database
 
 build/main.o: src/main.cpp
 	g++ -c src/main.cpp -Iinclude -o build/main.o
@@ -12,6 +12,9 @@ build/database.o: src/core/database.cpp
 
 build/method.o: src/utils/method.cpp
 	g++ -c src/utils/method.cpp -Iinclude -o build/method.o
+
+build/command.o: src/utils/command.cpp	
+	g++ -c src/utils/command.cpp -Iinclude -o build/command.o
 
 build/transaction.o: src/core/transaction.cpp
 	g++ -c src/core/transaction.cpp -Iinclude -o build/transaction.o

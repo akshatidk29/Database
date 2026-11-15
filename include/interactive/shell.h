@@ -12,7 +12,7 @@ private:
     Database *db;
     Transaction *txn;
     std::vector<std::string> tokenizer(std::string);
-    std::string getCommand();
+    std::string getCommandLine();
 
 public:
     void start();
