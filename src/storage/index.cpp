@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <unordered_map>
 #include <vector>
+#include <shared_mutex>
+#include <mutex>
 
 #include "core/transaction.h"
 #include "utils/return.h"
@@ -237,6 +239,7 @@ ReturnCode Index::readLogFile(){
 
 
 ReturnCode Index::readIndexEntry(const int& key, std::string* value){
+   std::shared_lock<std::shared_mutex> lock(this->indexMutex);
    if(this->index.count(key)){
       if(value){
          *value = this->index[key];
@@ -247,6 +250,7 @@ ReturnCode Index::readIndexEntry(const int& key, std::string* value){
 }
 
 ReturnCode Index::writeIndexEntry(const int& key, const std::string& value){
+   std::unique_lock<std::shared_mutex> lock(this->indexMutex);
    if(this->index.count(key)){
       return ReturnCode::KEY_ALREADY_EXIST;
    }
@@ -257,6 +261,7 @@ ReturnCode Index::writeIndexEntry(const int& key, const std::string& value){
 }
 
 ReturnCode Index::updateIndexEntry(const int& key, const std::string& value){
+   std::unique_lock<std::shared_mutex> lock(this->indexMutex);
    if(this->index.count(key)){
       this->index[key] = value;
       return ReturnCode::SUCCESS;
@@ -267,6 +272,7 @@ ReturnCode Index::updateIndexEntry(const int& key, const std::string& value){
 }
 
 ReturnCode Index::deleteIndexEntry(const int& key){
+   std::unique_lock<std::shared_mutex> lock(this->indexMutex);
    if(this->index.count(key)){
       this->index.erase(key);
       return ReturnCode::SUCCESS;
@@ -277,7 +283,7 @@ ReturnCode Index::deleteIndexEntry(const int& key){
 }
 
 ReturnCode Index::getNextEntry(std::pair<int, std::string>* nextEntry){
-   
+   std::unique_lock<std::shared_mutex> lock(this->indexMutex);
    if(this->index.empty()){
       return ReturnCode::FAILURE;
    }
@@ -298,12 +304,12 @@ ReturnCode Index::getNextEntry(std::pair<int, std::string>* nextEntry){
 }
 
 ReturnCode Index::getAllEntries(std::vector<std::pair<int, std::string>>* entries){
-   
+   std::shared_lock<std::shared_mutex> lock(this->indexMutex);
    if(entries == nullptr){
       return ReturnCode::FAILURE;
    }
 
-   for(const std::pair<int, std::string>& entry : this->index){
+   for(const auto& entry : this->index){
       entries->push_back(entry);
    }
 

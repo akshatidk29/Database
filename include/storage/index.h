@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <shared_mutex>
 
 #include "utils/return.h"
 
@@ -11,6 +12,7 @@ private:
    const int id;
    bool status;
    std::unordered_map<int, std::string> index;
+   mutable std::shared_mutex indexMutex;
 
    ReturnCode readLogFile();
    ReturnCode readDataFile();
