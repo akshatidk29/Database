@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: cmake -B build -S .
+
+      - name: Build Database
+        run: cmake --build build
+
+      - name: Run Test
+        run: |
+          printf "create 999 Password\nwrite 1 \"Hello\"\nread 1\nbegin\nwrite 2 \"World\"\ncommit\nread 2\ndisconnect\nconnect 999 Password\nread 1\nread 2\nexit\n" | ./database
