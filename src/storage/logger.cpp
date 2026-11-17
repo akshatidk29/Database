@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <mutex>
 
 #include "utils/method.h"
 #include "utils/return.h"
@@ -38,6 +39,7 @@ ReturnCode Logger::setLSN(){
 }
 
 int Logger::getLSN(){
+   std::lock_guard<std::mutex> guard(this->lock);
    return this->currentLsn;
 }
 
@@ -87,10 +89,12 @@ std::string Logger::getInstructionLog(Method method, const int& key, const std::
 }
 
 ReturnCode Logger::addTransactionLogs(const int &tid, std::vector<std::string> &logs){
+   std::lock_guard<std::mutex> guard(this->lock);
+
    std::ofstream logFileOut(this->logFilePath, std::ios::app);
    if(!logFileOut.is_open())
       return ReturnCode::LOG_FILE_ERROR;
-
+   
    logFileOut << std::to_string(this->currentLsn) << ":TXN-START:" + std::to_string(tid) << ":" << std::endl;
    this->currentLsn++;
    for(std::string log : logs){
@@ -100,23 +104,27 @@ ReturnCode Logger::addTransactionLogs(const int &tid, std::vector<std::string> &
    logFileOut << std::to_string(this->currentLsn) << ":TXN-END:" + std::to_string(tid) << ":" << std::endl;
    this->currentLsn++;
    logFileOut.close();
+
    return ReturnCode::SUCCESS;
 }
 
 ReturnCode Logger::addAbortLog(const int &tid){
+   std::lock_guard<std::mutex> guard(this->lock);
+
    std::ofstream logFileOut(this->logFilePath, std::ios::app);
    if(!logFileOut.is_open())
       return ReturnCode::LOG_FILE_ERROR;
-
    logFileOut << std::to_string(this->currentLsn) << ":TXN-START:" + std::to_string(tid) << ":" << std::endl;
    this->currentLsn++;
    logFileOut << std::to_string(this->currentLsn) << ":TXN-ABORT:" + std::to_string(tid) << ":" << std::endl;
    this->currentLsn++;
    logFileOut.close();
+
    return ReturnCode::SUCCESS;
 }
 
 ReturnCode Logger::clearLogFile(){
+   std::lock_guard<std::mutex> guard(this->lock);
    std::ofstream logFileOut(this->logFilePath, std::ios::trunc);
    if(!logFileOut.is_open()){
       return ReturnCode::LOG_FILE_ERROR;

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <iostream>
+#include <mutex>
 
 #include "utils/return.h"
 #include "utils/method.h"
@@ -12,7 +13,8 @@ private:
    bool status;
    int currentLsn;
    std::string logFilePath;
-   
+   std::mutex lock;
+
 public:
    Logger(const int& id);
 
